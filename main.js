@@ -171,8 +171,19 @@ async function main() {
     var cameraVertRot = 0;
     var cameraHozRot = 0;
     var delta = 0.01;
+    var ctrl = false;
+
+    addEventListener("keydown", (event) => {
+        ctrl = event.ctrlKey;
+    });
+
+    addEventListener("keyup", (event) => {
+        ctrl = event.ctrlKey;
+    });
 
     addEventListener("mousemove", (event) => {
+        if (!ctrl) return;
+
         cameraHozRot += event.movementX * delta;
         cameraVertRot = Math.max(Math.min(cameraVertRot - event.movementY * delta, degToRad(60)), degToRad(-50));
 
