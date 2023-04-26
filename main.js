@@ -45,7 +45,7 @@ function createFrameBufferInfo(gl, activeTex, width, height) {
     return result;
 }
 
-function createTexture(gl, path) {
+function createTexture(gl, path, redraw) {
     var texture = gl.createTexture();
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -59,6 +59,7 @@ function createTexture(gl, path) {
         gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
         gl.generateMipmap(gl.TEXTURE_2D);
+        redraw();
     })
 }
 
@@ -178,7 +179,7 @@ async function main() {
         drawScene();
     });
 
-    createTexture(gl, "./resources/palette.png");
+    createTexture(gl, "./resources/palette.png", drawScene);
     var fbInfo = createFrameBufferInfo(gl, gl.TEXTURE1, gl.canvas.clientWidth, gl.canvas.clientHeight);
     var sbInfo = createFrameBufferInfo(gl, gl.TEXTURE2, gl.canvas.clientWidth, gl.canvas.clientHeight);
 
