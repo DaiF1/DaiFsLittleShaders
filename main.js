@@ -178,7 +178,7 @@ async function main() {
         drawScene();
     });
 
-    createTexture(gl, "/resources/palette.png");
+    createTexture(gl, "./resources/palette.png");
     var fbInfo = createFrameBufferInfo(gl, gl.TEXTURE1, gl.canvas.clientWidth, gl.canvas.clientHeight);
     var sbInfo = createFrameBufferInfo(gl, gl.TEXTURE2, gl.canvas.clientWidth, gl.canvas.clientHeight);
 
