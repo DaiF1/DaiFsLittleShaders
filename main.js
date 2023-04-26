@@ -108,12 +108,12 @@ async function main() {
 
     var staticUniforms = {
         u_reverseLightDir: {data: m4.normalize([0.5, 0.7, -1]), type: "vec3"},
+        u_texture:         {data: 0,             type: "int1"},
     }
 
     var changingUniforms = {
         u_world:           {data: m4.identity(), type: "mat4"},
         u_worldViewMatrix: {data: m4.identity(), type: "mat4"},
-        u_texture:         {data: 0,             type: "int1"},
     }
 
     var postprodUniforms = {
