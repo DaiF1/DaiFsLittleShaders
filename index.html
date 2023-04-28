@@ -5,7 +5,7 @@
         <link rel="icon" type="image/svg+xml" href="/DaiFsLittleShaders/vite.svg" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>DaiF's Little Shaders</title>
-      <script type="module" crossorigin src="/DaiFsLittleShaders/assets/index-0c4460b4.js"></script>
+      <script type="module" crossorigin src="/DaiFsLittleShaders/assets/index-d7accd20.js"></script>
       <link rel="stylesheet" href="/DaiFsLittleShaders/assets/index-63b7d29d.css">
     </head>
     <body>
@@ -168,36 +168,26 @@
             uniform float u_height;
 
             void main() {
-                const int outlineWidth = 7;
-                float m[outlineWidth * outlineWidth];
+                const float outlineWidth = 5.0;
 
-                for (int i = 0; i < outlineWidth; i++) {
-                    for (int j = 0; j < outlineWidth; j++) {
-                        vec3 n[9];
-                        float w = 1.0 / u_width;
-                        float h = 1.0 / u_height;
-                        for (int y = 0; y < 3; y++) {
-                            for (int x = 0; x < 3; x++) {
-                                n[y * 3 + x] = texture2D(u_depthTexture, v_texcoord +
-                                    vec2(float(i - 1 + x - 1) * w, float(j - 1 + y - 1) * h)).rgb;
-                            }
-                        }
-
-                        vec3 sobel_edge_h = n[2] + (2.0*n[5]) + n[8] - (n[0] + (2.0*n[3]) + n[6]);
-                        vec3 sobel_edge_v = n[0] + (2.0*n[1]) + n[2] - (n[6] + (2.0*n[7]) + n[8]);
-                        vec3 sobel = sqrt((sobel_edge_h * sobel_edge_h) + (sobel_edge_v * sobel_edge_v));
-
-                        float lumi = float(2.0 * sobel.r + sobel.b + 3.0 * sobel.g) / 6.0;
-                        m[j * outlineWidth + i] = 1.0 - step(0.2, lumi);
+                vec3 n[9];
+                float w = (1.0 / u_width) * outlineWidth;
+                float h = (1.0 / u_height) * outlineWidth;
+                for (int y = 0; y < 3; y++) {
+                    for (int x = 0; x < 3; x++) {
+                        n[y * 3 + x] = texture2D(u_depthTexture, v_texcoord +
+                            vec2(float(x - 1) * w, float(y - 1) * h)).rgb;
                     }
                 }
 
-                float edge = m[0];
-                for (int i = 1; i < outlineWidth * outlineWidth; i++) {
-                    edge = min(m[i], edge);
-                }
+                vec3 sobel_edge_h = n[2] + (2.0*n[5]) + n[8] - (n[0] + (2.0*n[3]) + n[6]);
+                vec3 sobel_edge_v = n[0] + (2.0*n[1]) + n[2] - (n[6] + (2.0*n[7]) + n[8]);
+                vec3 sobel = sqrt((sobel_edge_h * sobel_edge_h) + (sobel_edge_v * sobel_edge_v));
 
-                vec3 color = vec3(edge) * texture2D(u_screenTexture, v_texcoord).rgb;
+                float lumi = float(2.0 * sobel.r + sobel.b + 3.0 * sobel.g) / 6.0;
+                float outline = 1.0 - lumi;
+
+                vec3 color = vec3(outline) * texture2D(u_screenTexture, v_texcoord).rgb;
                 gl_FragColor = vec4(color, 1.0);
             }
         </script>
