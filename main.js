@@ -184,7 +184,7 @@ async function main() {
     addEventListener("mousemove", (event) => {
         if (!ctrl) return;
 
-        cameraHozRot += event.movementX * delta;
+        cameraHozRot -= event.movementX * delta;
         cameraVertRot = Math.max(Math.min(cameraVertRot - event.movementY * delta, degToRad(60)), degToRad(-50));
 
         drawScene();
