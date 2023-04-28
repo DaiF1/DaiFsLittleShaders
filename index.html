@@ -171,19 +171,14 @@
                 vec3 n[9];
                 float w = (1.0 / u_width) * outlineWidth;
                 float h = (1.0 / u_height) * outlineWidth;
-                for (int y = 0; y < 3; y++) {
-                    for (int x = 0; x < 3; x++) {
-                        n[y * 3 + x] = texture2D(u_depthTexture, v_texcoord +
-                            vec2(float(x - 1) * w, float(y - 1) * h)).rgb;
-                    }
-                }
 
-                vec3 sobel_edge_h = n[2] + (2.0*n[5]) + n[8] - (n[0] + (2.0*n[3]) + n[6]);
-                vec3 sobel_edge_v = n[0] + (2.0*n[1]) + n[2] - (n[6] + (2.0*n[7]) + n[8]);
-                vec3 sobel = sqrt((sobel_edge_h * sobel_edge_h) + (sobel_edge_v * sobel_edge_v));
+                vec3 leftColor = texture2D(u_depthTexture, v_texcoord + vec2(-w, 0)).rgb;
+                vec3 rightColor = texture2D(u_depthTexture, v_texcoord + vec2(w, 0)).rgb;
+                vec3 topColor = texture2D(u_depthTexture, v_texcoord + vec2(0, h)).rgb;
+                vec3 bottomColor = texture2D(u_depthTexture, v_texcoord + vec2(0, -h)).rgb;
 
-                float lumi = float(2.0 * sobel.r + sobel.b + 3.0 * sobel.g) / 6.0;
-                float outline = 1.0 - lumi;
+                vec2 gradient = vec2(length(rightColor - leftColor), length(topColor - bottomColor));
+                float outline = 1.0 - step(0.2, length(gradient));
 
                 vec3 color = vec3(outline) * texture2D(u_screenTexture, v_texcoord).rgb;
                 gl_FragColor = vec4(color, 1.0);
