@@ -124,6 +124,7 @@ async function main() {
     var changingUniforms = {
         u_world:           {data: m4.identity(), type: "mat4"},
         u_worldViewMatrix: {data: m4.identity(), type: "mat4"},
+        u_cameraView:      {data: m4.identity(), type: "mat4"},
         u_time:            {data: 0.0,           type: "float1"},
     }
 
@@ -232,6 +233,7 @@ async function main() {
 
             changingUniforms["u_worldViewMatrix"]["data"] = worldViewMatrix;
             changingUniforms["u_world"]["data"] = worldMatrix;
+            changingUniforms["u_cameraView"]["data"] = cameraMatrix;
             changingUniforms["u_time"]["data"] = delta;
 
             setBufferAttribs(gl, currProgram, bufferInfo)
