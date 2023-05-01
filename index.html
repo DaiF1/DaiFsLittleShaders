@@ -155,9 +155,9 @@
                 // generated coords
                 float scale = 2.0;
                 float time = cos(u_time * 10.0);
-                time = (floor(time) + ceil(time)) * 0.3;
+                time = (floor(time) + ceil(time)) * 0.25;
                 vec4 pos = v_position * u_cameraView;
-                vec2 st = vec2(pos.x * scale + time, pos.y * scale * 0.5 + time);
+                vec2 st = vec2(pos.x * scale, pos.y * scale * 0.5 + time);
 
                 vec3 filter = vec3(1.0 - step(0.5, light));
                 vec3 colorHash = texture2D(u_textureHash, st).rgb * filter;
