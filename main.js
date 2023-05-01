@@ -45,7 +45,7 @@ function createFrameBufferInfo(gl, activeTex, width, height) {
     return result;
 }
 
-function createTexture(gl, path, activeTex) {
+function createTexture(gl, path, activeTex, filter) {
     var texture = gl.createTexture();
     gl.activeTexture(activeTex);
     gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -58,7 +58,15 @@ function createTexture(gl, path, activeTex) {
     image.addEventListener("load", () => {
         gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-        gl.generateMipmap(gl.TEXTURE_2D);
+        if ((image.width & (image.width - 1)) == 0 && (image.height & (image.height - 1)) == 0) {
+            gl.generateMipmap(gl.TEXTURE_2D);
+        }
+        else {
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        }
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_FILTER, filter);
     })
 }
 
@@ -190,8 +198,8 @@ async function main() {
         cameraVertRot = Math.max(Math.min(cameraVertRot - event.movementY * movDelta, degToRad(60)), degToRad(-50));
     });
 
-    createTexture(gl, "./resources/palette.png", gl.TEXTURE0);
-    createTexture(gl, "./resources/hash.png", gl.TEXTURE3);
+    createTexture(gl, "./resources/palette.png", gl.TEXTURE0, gl.LINEAR);
+    createTexture(gl, "./resources/hash.png", gl.TEXTURE3, gl.NEAREST);
     var fbInfo = createFrameBufferInfo(gl, gl.TEXTURE1, gl.canvas.clientWidth, gl.canvas.clientHeight);
     var sbInfo = createFrameBufferInfo(gl, gl.TEXTURE2, gl.canvas.clientWidth, gl.canvas.clientHeight);
 
