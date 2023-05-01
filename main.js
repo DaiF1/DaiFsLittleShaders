@@ -45,9 +45,9 @@ function createFrameBufferInfo(gl, activeTex, width, height) {
     return result;
 }
 
-function createTexture(gl, path) {
+function createTexture(gl, path, activeTex) {
     var texture = gl.createTexture();
-    gl.activeTexture(gl.TEXTURE0);
+    gl.activeTexture(activeTex);
     gl.bindTexture(gl.TEXTURE_2D, texture);
 
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
@@ -77,10 +77,12 @@ async function main() {
         default: {vertex: "default-vertex",     fragment: "default-fragment"},
         gooch:   {vertex: "default-vertex",     fragment: "gooch-fragment"},
         comics:  {vertex: "default-vertex",     fragment: "comics-fragment"},
+        drawing:  {vertex: "default-vertex",     fragment: "drawing-fragment"},
 
         postp_default: {vertex: "default-vertex-postp",     fragment: "default-fragment-postp"},
         postp_gooch:   {vertex: "default-vertex-postp",     fragment: "outline-fragment-postp"},
         postp_comics:  {vertex: "default-vertex-postp",     fragment: "outline-fragment-postp"},
+        postp_drawing:  {vertex: "default-vertex-postp",     fragment: "outline-fragment-postp"},
     }
 
     buildProgramsFromArray(gl, programs);
@@ -108,6 +110,7 @@ async function main() {
     var staticUniforms = {
         u_reverseLightDir: {data: m4.normalize([0.5, 0.7, -1]), type: "vec3"},
         u_texture:         {data: 0,             type: "int1"},
+        u_textureHash:     {data: 3,             type: "int1"},
     }
 
     var changingUniforms = {
@@ -187,7 +190,8 @@ async function main() {
         cameraVertRot = Math.max(Math.min(cameraVertRot - event.movementY * movDelta, degToRad(60)), degToRad(-50));
     });
 
-    createTexture(gl, "./resources/palette.png", drawScene);
+    createTexture(gl, "./resources/palette.png", gl.TEXTURE0);
+    createTexture(gl, "./resources/hash.png", gl.TEXTURE3);
     var fbInfo = createFrameBufferInfo(gl, gl.TEXTURE1, gl.canvas.clientWidth, gl.canvas.clientHeight);
     var sbInfo = createFrameBufferInfo(gl, gl.TEXTURE2, gl.canvas.clientWidth, gl.canvas.clientHeight);
 
@@ -220,6 +224,7 @@ async function main() {
 
             changingUniforms["u_worldViewMatrix"]["data"] = worldViewMatrix;
             changingUniforms["u_world"]["data"] = worldMatrix;
+            changingUniforms["u_time"]["data"] = delta;
 
             setBufferAttribs(gl, currProgram, bufferInfo)
             setUniforms(gl, currProgram, changingUniforms);
