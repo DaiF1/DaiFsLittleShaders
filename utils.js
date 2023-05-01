@@ -78,13 +78,14 @@ function setAttribs(gl, program, attribs) {
         if (!attribLocations[program][attr]) {
             attribLocations[program][attr] = gl.getAttribLocation(getProgram(program), attr);
         }
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, attribs[attr]["buffer"]);
-        gl.enableVertexAttribArray(attribLocations[program][attr]);
-        gl.vertexAttribPointer(
-            attribLocations[program][attr],
-            attribs[attr]["numComponents"], gl.FLOAT, false, 0, 0
-        );
+        if (attribLocations[program][attr] !== -1) {
+            gl.bindBuffer(gl.ARRAY_BUFFER, attribs[attr]["buffer"]);
+            gl.enableVertexAttribArray(attribLocations[program][attr]);
+            gl.vertexAttribPointer(
+                attribLocations[program][attr],
+                attribs[attr]["numComponents"], gl.FLOAT, false, 0, 0
+            );
+        }
     });
 }
 
