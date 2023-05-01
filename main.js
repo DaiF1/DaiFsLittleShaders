@@ -208,7 +208,7 @@ async function main() {
     function drawObjects(aspect) {
         var fov = degToRad(60);
         var zNear = 1;
-        var zFar = 2000;
+        var zFar = 200;
         var cameraMatrix = m4.yRotation(cameraHozRot);
         cameraMatrix = m4.xRotate(cameraMatrix, cameraVertRot);
         cameraMatrix = m4.translate(cameraMatrix, 0, 10, 0)
