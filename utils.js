@@ -102,6 +102,9 @@ function setUniforms(gl, program, uniforms) {
         }
 
         switch (uniforms[uni]["type"]) {
+            case "float1":
+                gl.uniform1f(uniformLocations[program][uni],
+                    uniforms[uni].data)
             case "int1":
                 gl.uniform1i(uniformLocations[program][uni],
                     uniforms[uni].data);

@@ -45,7 +45,7 @@ function createFrameBufferInfo(gl, activeTex, width, height) {
     return result;
 }
 
-function createTexture(gl, path, redraw) {
+function createTexture(gl, path) {
     var texture = gl.createTexture();
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -59,7 +59,6 @@ function createTexture(gl, path, redraw) {
         gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
         gl.generateMipmap(gl.TEXTURE_2D);
-        redraw();
     })
 }
 
@@ -92,7 +91,6 @@ async function main() {
     shaderSelector.addEventListener("change", () => {
         currProgram = shaderSelector.value;
         refreshAttr(currProgram);
-        drawScene();
     });
 
     function refreshAttr(program) {
@@ -115,6 +113,7 @@ async function main() {
     var changingUniforms = {
         u_world:           {data: m4.identity(), type: "mat4"},
         u_worldViewMatrix: {data: m4.identity(), type: "mat4"},
+        u_time:            {data: 0.0,           type: "float1"},
     }
 
     var postprodUniforms = {
@@ -170,7 +169,7 @@ async function main() {
 
     var cameraVertRot = 0;
     var cameraHozRot = 0;
-    var delta = 0.01;
+    var movDelta = 0.01;
     var ctrl = false;
 
     addEventListener("keydown", (event) => {
@@ -184,10 +183,8 @@ async function main() {
     addEventListener("mousemove", (event) => {
         if (!ctrl) return;
 
-        cameraHozRot -= event.movementX * delta;
-        cameraVertRot = Math.max(Math.min(cameraVertRot - event.movementY * delta, degToRad(60)), degToRad(-50));
-
-        drawScene();
+        cameraHozRot -= event.movementX * movDelta;
+        cameraVertRot = Math.max(Math.min(cameraVertRot - event.movementY * movDelta, degToRad(60)), degToRad(-50));
     });
 
     createTexture(gl, "./resources/palette.png", drawScene);
@@ -235,7 +232,11 @@ async function main() {
         }
     }
 
+    var delta = 0.0;
+
     function drawScene() {
+        delta += 0.03;
+
         {
             gl.bindFramebuffer(gl.FRAMEBUFFER, fbInfo.frameBuffer);
             gl.activeTexture(gl.TEXTURE1);
@@ -293,7 +294,6 @@ async function main() {
             gl.enable(gl.CULL_FACE);
             gl.enable(gl.DEPTH_TEST);
 
-            const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
             var buffers = {
                 position: [-1,-1,0, 1,-1,0, -1,1,0, -1,1,0, 1,-1,0, 1,1,0],
                 texcoord: [0,0, 1,0, 0,1, 0,1, 1,0, 1,1],
@@ -307,7 +307,8 @@ async function main() {
         }
     }
 
-    drawScene();
+    drawScene()
+    setInterval(drawScene, 33);
 }
 
 main() 
