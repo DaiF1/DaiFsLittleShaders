@@ -5,7 +5,7 @@
         <link rel="icon" type="image/svg+xml" href="/DaiFsLittleShaders/vite.svg" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>DaiF's Little Shaders</title>
-      <script type="module" crossorigin src="/DaiFsLittleShaders/assets/index-d7accd20.js"></script>
+      <script type="module" crossorigin src="/DaiFsLittleShaders/assets/index-a509606e.js"></script>
       <link rel="stylesheet" href="/DaiFsLittleShaders/assets/index-63b7d29d.css">
     </head>
     <body>
@@ -13,6 +13,7 @@
             <option value="default" selected>Default</option>
             <option value="gooch">Gooch</option>
             <option value="comics">Comics</option>
+            <option value="drawing">Hand-Drawn</option>
         </select>
         <canvas id="c"></canvas>
         
@@ -24,12 +25,14 @@
             uniform mat4 u_worldViewMatrix;
             uniform mat4 u_world;
 
+            varying vec4 v_position;
             varying vec2 v_texcoord;
             varying vec3 v_normal;
 
             void main() {
                 gl_Position = u_worldViewMatrix * a_position;
 
+                v_position = u_world * a_position;
                 v_texcoord = a_texcoord;
                 v_normal = mat3(u_world) * a_normal;
             }
@@ -133,6 +136,42 @@
             }
         </script>
 
+        <script id="drawing-fragment" type="shader/fragment">
+            precision mediump float;
+
+            varying vec4 v_position;
+            varying vec2 v_texcoord;
+            varying vec3 v_normal;
+
+            uniform sampler2D u_texture;
+            uniform sampler2D u_textureHash;
+            uniform vec3 u_reverseLightDir;
+            uniform mat4 u_cameraView;
+            uniform float u_time;
+
+            void main() {
+                // color
+                vec3 normal = normalize(v_normal);
+                float light = (1.0 + dot(normal, u_reverseLightDir)) / 2.0;
+
+                // generated coords
+                float scale = 2.0;
+                float time = cos(u_time * 10.0);
+                time = (floor(time) + ceil(time)) * 0.25;
+                vec4 pos = v_position * u_cameraView;
+                vec2 st = vec2(pos.x * scale, pos.y * scale * 0.5 + time);
+
+                vec3 filter = vec3(1.0 - step(0.5, light));
+                vec3 colorHash = texture2D(u_textureHash, st).rgb * filter;
+                
+                vec3 shadow = vec3(0.5, 0.5, 0.5);
+                float f = step(0.2, light);
+                vec3 col = vec3(f) + vec3(1.0 - f) * shadow.xyz;
+
+                gl_FragColor = vec4(col - colorHash, 1.0);
+            }
+        </script>
+
         <script id="default-vertex-postp" type="shader/vertex">
             attribute vec4 a_position;
             attribute vec2 a_texcoord;
@@ -173,19 +212,14 @@
                 vec3 n[9];
                 float w = (1.0 / u_width) * outlineWidth;
                 float h = (1.0 / u_height) * outlineWidth;
-                for (int y = 0; y < 3; y++) {
-                    for (int x = 0; x < 3; x++) {
-                        n[y * 3 + x] = texture2D(u_depthTexture, v_texcoord +
-                            vec2(float(x - 1) * w, float(y - 1) * h)).rgb;
-                    }
-                }
 
-                vec3 sobel_edge_h = n[2] + (2.0*n[5]) + n[8] - (n[0] + (2.0*n[3]) + n[6]);
-                vec3 sobel_edge_v = n[0] + (2.0*n[1]) + n[2] - (n[6] + (2.0*n[7]) + n[8]);
-                vec3 sobel = sqrt((sobel_edge_h * sobel_edge_h) + (sobel_edge_v * sobel_edge_v));
+                vec3 leftColor = texture2D(u_depthTexture, v_texcoord + vec2(-w, 0)).rgb;
+                vec3 rightColor = texture2D(u_depthTexture, v_texcoord + vec2(w, 0)).rgb;
+                vec3 topColor = texture2D(u_depthTexture, v_texcoord + vec2(0, h)).rgb;
+                vec3 bottomColor = texture2D(u_depthTexture, v_texcoord + vec2(0, -h)).rgb;
 
-                float lumi = float(2.0 * sobel.r + sobel.b + 3.0 * sobel.g) / 6.0;
-                float outline = 1.0 - lumi;
+                vec2 gradient = vec2(length(rightColor - leftColor), length(topColor - bottomColor));
+                float outline = 1.0 - step(0.2, length(gradient));
 
                 vec3 color = vec3(outline) * texture2D(u_screenTexture, v_texcoord).rgb;
                 gl_FragColor = vec4(color, 1.0);
