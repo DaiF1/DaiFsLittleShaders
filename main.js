@@ -104,16 +104,22 @@ async function main() {
     });
 
     function refreshAttr(program) {
-        setBufferAttribs(gl, program, bufferInfo);
+        setBufferAttribs(gl, program, treeBuffer);
         setUniforms(gl, program, staticUniforms);
     }
 
     // load obj
-    const response = await fetch('resources/tree.obj');
+    var response = await fetch('resources/tree.obj');
     var text = await response.text();
-    const d = parseOBJ(text);
+    var d = parseOBJ(text);
 
-    var bufferInfo = createBufferInfo(gl, d);
+    var treeBuffer = createBufferInfo(gl, d);
+
+    response = await fetch('resources/ground.obj');
+    text = await response.text();
+    d = parseOBJ(text);
+
+    var groundBuffer = createBufferInfo(gl, d);
 
     var staticUniforms = {
         u_reverseLightDir: {data: m4.normalize([0.5, 0.7, -1]), type: "vec3"},
@@ -135,7 +141,7 @@ async function main() {
         u_screenTexture: {data: 2,                      type: "int1"},
     }
 
-    setBufferAttribs(gl, currProgram, bufferInfo)
+    setBufferAttribs(gl, currProgram, treeBuffer)
     setUniforms(gl, currProgram, staticUniforms);
 
     function radToDeg(r) {
@@ -148,32 +154,44 @@ async function main() {
 
     var objects = [
         {
+            bufferInfo: treeBuffer,
             translation: [0, 0, -23],
             rotation: [degToRad(0), degToRad(0), degToRad(0)],
             scale: [2, 2, 2],
         },
         {
+            bufferInfo: treeBuffer,
             translation: [0, 0, 25],
             rotation: [degToRad(0), degToRad(0), degToRad(0)],
             scale: [2, 2, 2],
         },
         {
+            bufferInfo: treeBuffer,
             translation: [10, 0, 20],
             rotation: [degToRad(0), degToRad(0), degToRad(0)],
             scale: [2, 2, 2],
         },
         {
+            bufferInfo: treeBuffer,
             translation: [-11, 0, -22],
             rotation: [degToRad(0), degToRad(0), degToRad(0)],
             scale: [2, 2, 2],
         },
         {
+            bufferInfo: treeBuffer,
             translation: [23, 0, 0],
             rotation: [degToRad(0), degToRad(0), degToRad(0)],
             scale: [2, 2, 2],
         },
         {
+            bufferInfo: treeBuffer,
             translation: [-22, 0, -1],
+            rotation: [degToRad(0), degToRad(0), degToRad(0)],
+            scale: [2, 2, 2],
+        },
+        {
+            bufferInfo: groundBuffer,
+            translation: [0, -10, 0],
             rotation: [degToRad(0), degToRad(0), degToRad(0)],
             scale: [2, 2, 2],
         },
@@ -236,14 +254,14 @@ async function main() {
             changingUniforms["u_cameraView"]["data"] = cameraMatrix;
             changingUniforms["u_time"]["data"] = delta;
 
-            setBufferAttribs(gl, currProgram, bufferInfo)
+            setBufferAttribs(gl, currProgram, objects[i].bufferInfo)
             setUniforms(gl, currProgram, changingUniforms);
 
             // draw
 
             gl.enable(gl.CULL_FACE);
             gl.enable(gl.DEPTH_TEST);
-            gl.drawArrays(gl.TRIANGLES, 0, bufferInfo.numElements);
+            gl.drawArrays(gl.TRIANGLES, 0, objects[i].bufferInfo.numElements);
         }
     }
 
