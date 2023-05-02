@@ -175,7 +175,7 @@
                 float light = (1.0 + dot(normal, u_reverseLightDir)) / 2.0;
 
                 // generated coords
-                float scale = 2.0;
+                float scale = 10.0;
                 float time = cos(u_time * 10.0);
                 time = (floor(time) + ceil(time)) * 0.25;
                 vec4 pos = v_position * u_cameraView;
