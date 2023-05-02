@@ -256,6 +256,8 @@ async function main() {
             worldMatrix = m4.scale(worldMatrix, scale[0], scale[1], scale[2]);
 
             var worldViewMatrix = m4.multiply(viewProjMatrix, worldMatrix);
+            worldMatrix = m4.inverse(worldMatrix);
+            worldMatrix = m4.transpose(worldMatrix);
 
             changingUniforms["u_worldViewMatrix"]["data"] = worldViewMatrix;
             changingUniforms["u_world"]["data"] = worldMatrix;
