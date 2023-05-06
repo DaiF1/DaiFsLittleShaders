@@ -54,38 +54,6 @@
             }
         </script>
 
-        <script id="vertex-depth" type="shader/vertex">
-            attribute vec4 a_position;
-            attribute vec3 a_normal;
-
-            uniform mat4 u_worldViewMatrix;
-            uniform mat4 u_world;
-
-            varying float v_depth;
-            varying vec3 v_normal;
-
-            void main() {
-                gl_Position = u_worldViewMatrix * a_position;
-
-                v_depth = gl_Position.z;
-                v_normal = mat3(u_world) * a_normal;
-            }
-        </script>
-
-        <script id="fragment-depth" type="shader/fragment">
-            precision mediump float;
-
-            varying float v_depth;
-            varying vec3 v_normal;
-
-            float zFar = 200.0;
-
-            void main() {
-                vec3 color = vec3(1.0 - v_depth / zFar);
-                gl_FragColor = vec4(color, 1);
-            }
-        </script>
-
         <script id="gooch-fragment" type="shader/fragment">
             precision mediump float;
 
