@@ -4,48 +4,49 @@ import { parseOBJ } from './obj_parser.js'
 
 import './style.css'
 
-function createFrameBufferInfo(gl, activeTex, width, height) {
-    // create to render to
+function createFrameBufferInfo(gl, width, height) {
+    // color texture
+
     const targetTexture = gl.createTexture();
-    gl.activeTexture(activeTex);
+    gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, targetTexture);
 
-    // define size and format of level 0
-    const level = 0;
-    const internalFormat = gl.RGBA;
-    const border = 0;
-    const format = gl.RGBA;
-    const type = gl.UNSIGNED_BYTE;
-    const data = null;
-    gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
-        width, height, border,
-        format, type, data);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA,
+        width, height, 0,
+        gl.RGBA, gl.UNSIGNED_BYTE, null);
 
-    // set the filtering so we don't need mips
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-    const depth = gl.createRenderbuffer();
-    gl.bindRenderbuffer(gl.RENDERBUFFER, depth);
-    gl.renderbufferStorage(
-        gl.RENDERBUFFER,
-        gl.DEPTH_COMPONENT16,
-        width, height
-    );
+    // depth texture
+    const depthTexture = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, depthTexture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT,
+        width, height, 0, gl.DEPTH_COMPONENT,
+        gl.UNSIGNED_INT, null);
 
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    
+    // bind textures to framebuffer
     const fb = gl.createFramebuffer();
     gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
 
     gl.framebufferTexture2D(
-        gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, targetTexture, level);
+        gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, targetTexture, 0);
 
-    gl.framebufferRenderbuffer(
-        gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depth);
+    gl.framebufferTexture2D(
+        gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
+
 
     var result = {
         frameBuffer: fb,
         texture: targetTexture,
+        depth: depthTexture,
         width: width,
         height: height,
     }
@@ -85,11 +86,14 @@ async function main() {
 
     if (!gl) {
         console.log("ERROR: Failed to initialize webgl")
+        return;
     }
 
-    var programs = {
-        depth:   {vertex: "vertex-depth", fragment: "fragment-depth"},
+    const ext = gl.getExtension("WEBGL_depth_texture");
+    if (!ext)
+        return alert("Unable to load depth texture");
 
+    var programs = {
         default: {vertex: "default-vertex",     fragment: "default-fragment"},
         gooch:   {vertex: "default-vertex",     fragment: "gooch-fragment"},
         comics:  {vertex: "default-vertex",     fragment: "comics-fragment"},
@@ -131,7 +135,7 @@ async function main() {
 
     var staticUniforms = {
         u_reverseLightDir: {data: m4.normalize([0.5, 0.7, -1]), type: "vec3"},
-        u_texture:         {data: 0,             type: "int1"},
+        u_texture:         {data: 2,             type: "int1"},
         u_textureHash:     {data: 3,             type: "int1"},
     }
 
@@ -145,8 +149,8 @@ async function main() {
     var postprodUniforms = {
         u_width:         {data: gl.canvas.clientWidth,  type: "float1"},
         u_height:        {data: gl.canvas.clientHeight, type: "float1"},
-        u_depthTexture:  {data: 1,                      type: "int1"},
-        u_screenTexture: {data: 2,                      type: "int1"},
+        u_depthTexture:  {data: 0,                      type: "int1"},
+        u_screenTexture: {data: 1,                      type: "int1"},
     }
 
     setBufferAttribs(gl, currProgram, treeBuffer)
@@ -225,10 +229,9 @@ async function main() {
         cameraVertRot = Math.max(Math.min(cameraVertRot - event.movementY * movDelta, degToRad(60)), degToRad(-50));
     });
 
-    createTexture(gl, "./resources/palette.png", gl.TEXTURE0, gl.LINEAR);
+    createTexture(gl, "./resources/palette.png", gl.TEXTURE2, gl.LINEAR);
     createTexture(gl, "./resources/hash.png", gl.TEXTURE3, gl.NEAREST);
-    var fbInfo = createFrameBufferInfo(gl, gl.TEXTURE1, gl.canvas.clientWidth, gl.canvas.clientHeight);
-    var sbInfo = createFrameBufferInfo(gl, gl.TEXTURE2, gl.canvas.clientWidth, gl.canvas.clientHeight);
+    var fbInfo = createFrameBufferInfo(gl, gl.canvas.clientWidth, gl.canvas.clientHeight);
 
     // draw function written that way to allow redraw on event later
     function drawObjects(aspect) {
@@ -282,10 +285,6 @@ async function main() {
 
         {
             gl.bindFramebuffer(gl.FRAMEBUFFER, fbInfo.frameBuffer);
-            gl.activeTexture(gl.TEXTURE1);
-            gl.bindTexture(gl.TEXTURE_2D, fbInfo.texture);
-            var prog = currProgram;
-            currProgram = "depth"
             refreshAttr(currProgram);
 
             // Setup canvas
@@ -299,26 +298,6 @@ async function main() {
             gl.enable(gl.DEPTH_TEST);
 
             const aspect = fbInfo.width / fbInfo.height;
-            drawObjects(aspect);
-
-            currProgram = prog;
-        }
-
-        {
-            gl.bindFramebuffer(gl.FRAMEBUFFER, sbInfo.frameBuffer);
-            refreshAttr(currProgram);
-
-            // Setup canvas
-            resizeCanvasToDisplaySize(gl.canvas);
-            gl.viewport(0, 0, sbInfo.width, sbInfo.height);
-
-            gl.clearColor(1, 1, 1, 1);
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-            
-            gl.enable(gl.CULL_FACE);
-            gl.enable(gl.DEPTH_TEST);
-
-            const aspect = sbInfo.width / sbInfo.height;
             drawObjects(aspect);
         }
 
