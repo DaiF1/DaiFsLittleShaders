@@ -55,6 +55,8 @@
                 float light = (1.0 + dot(normal, u_reverseLightDir)) / 2.0;
 
                 vec3 shadowTexcoord = v_shadowTexcoord.xyz / v_shadowTexcoord.w;
+                float currDepth = shadowTexcoord.z;
+
                 bool inRange =
                     shadowTexcoord.x >= 0.0 &&
                     shadowTexcoord.x <= 1.0 &&
@@ -62,10 +64,10 @@
                     shadowTexcoord.y <= 1.0;
 
                 vec4 texColor = texture2D(u_texture, v_texcoord) * light;
-                vec4 shadowColor = texture2D(u_shadowTexture, shadowTexcoord.xy);
+                float projDepth = texture2D(u_shadowTexture, shadowTexcoord.xy).r;
+                float shadowLight = (inRange && projDepth <= currDepth) ? 0.0 : 1.0;
 
-                float projectionAmount = inRange ? 1.0 : 0.0;
-                gl_FragColor = mix(texColor, shadowColor, projectionAmount);
+                gl_FragColor = vec4(texColor.rgb * shadowLight, texColor.a);
             }
         </script>
 

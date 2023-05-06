@@ -1,8 +1,55 @@
 import { resizeCanvasToDisplaySize, buildProgramsFromArray, setUniforms, setBufferAttribs, createBufferInfo } from './utils.js'
-import { m4 } from './matrices.js'
+import { m3, m4 } from './matrices.js'
 import { parseOBJ } from './obj_parser.js'
 
 import './style.css'
+
+function createDepthBuffer(gl) {
+    // color texture
+    const targetTexture = gl.createTexture();
+    const depthTextureSize = 512;
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, targetTexture);
+
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA,
+        depthTextureSize, depthTextureSize, 0,
+        gl.RGBA, gl.UNSIGNED_BYTE, null);
+
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+    // depth texture
+    const depthTexture = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, depthTexture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT,
+        depthTextureSize, depthTextureSize, 0, gl.DEPTH_COMPONENT,
+        gl.UNSIGNED_INT, null);
+
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    
+    // bind textures to framebuffer
+    const fb = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+
+    gl.framebufferTexture2D(
+        gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, targetTexture, 0);
+
+    gl.framebufferTexture2D(
+        gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
+
+
+    var result = {
+        frameBuffer: fb,
+        depth: depthTexture,
+    }
+
+    return result;
+}
 
 function createFrameBufferInfo(gl, width, height) {
     // color texture
@@ -134,26 +181,11 @@ async function main() {
     var groundBuffer = createBufferInfo(gl, d);
 
     var lightDir = m4.normalize([0.5, 0.7, -1]);
-    var shadowWorldMatrix = m4.lookAt(
-        [0, 3, 0],
-        lightDir,
-        [0, 1, 0]
-    )
-    var shadowProjMatrix = m4.perspective(degToRad(80),
-        gl.canvas.clientWidth / gl.canvas.clientHeight,
-        0.1, 200);
-    
-    var shadowMatrix = m4.translation(0.5, 0.5, 0.5);
-    shadowMatrix = m4.scale(shadowMatrix, 0.5, 0.5, 0.5);
-    shadowMatrix = m4.multiply(shadowMatrix, shadowProjMatrix);
-    shadowMatrix = m4.multiply(shadowMatrix,
-        m4.inverse(shadowWorldMatrix));
 
     var staticUniforms = {
         u_reverseLightDir: {data: lightDir,      type: "vec3"},
-        u_shadowMatrix:    {data: shadowMatrix,  type: "mat4"},
         u_texture:         {data: 2,             type: "int1"},
-        u_shadowTexture:   {data: 3,             type: "int1"},
+        u_shadowTexture:   {data: 0,             type: "int1"},
         u_textureHash:     {data: 4,             type: "int1"},
     }
 
@@ -161,6 +193,7 @@ async function main() {
         u_world:           {data: m4.identity(), type: "mat4"},
         u_worldViewMatrix: {data: m4.identity(), type: "mat4"},
         u_cameraView:      {data: m4.identity(), type: "mat4"},
+        u_shadowMatrix:    {data: m4.identity(), type: "mat4"},
         u_time:            {data: 0.0,           type: "float1"},
     }
 
@@ -250,9 +283,10 @@ async function main() {
     createTexture(gl, "./resources/palette.png", gl.TEXTURE2, gl.LINEAR);
     createTexture(gl, "./resources/hash.png", gl.TEXTURE4, gl.NEAREST);
     var fbInfo = createFrameBufferInfo(gl, gl.canvas.clientWidth, gl.canvas.clientHeight);
+    var depthBuffer = createDepthBuffer(gl);
 
     // draw function written that way to allow redraw on event later
-    function drawObjects(projMatrix, cameraMatrix) {
+    function drawObjects(projMatrix, cameraMatrix, shadowMatrix) {
         var viewMatrix = m4.inverse(cameraMatrix);
         var viewProjMatrix = m4.multiply(projMatrix, viewMatrix)
 
@@ -275,6 +309,7 @@ async function main() {
             changingUniforms["u_worldViewMatrix"]["data"] = worldViewMatrix;
             changingUniforms["u_world"]["data"] = worldMatrix;
             changingUniforms["u_cameraView"]["data"] = cameraMatrix;
+            changingUniforms["u_shadowMatrix"]["data"] = shadowMatrix;
             changingUniforms["u_time"]["data"] = delta;
 
             setBufferAttribs(gl, currProgram, objects[i].bufferInfo)
@@ -292,12 +327,38 @@ async function main() {
 
     function drawScene() {
         delta += 0.03;
-        
+ 
+        // Depth texture pass
         {
+            gl.bindFramebuffer(gl.FRAMEBUFFER, depthBuffer.frameBuffer);
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, depthBuffer.depth);
+            refreshAttr(currProgram);
+
+            resizeCanvasToDisplaySize(gl.canvas);
+            gl.viewport(0, 0, 512, 512);
+
+            gl.clearColor(1, 1, 1, 1);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            
+            gl.enable(gl.CULL_FACE);
+            gl.enable(gl.DEPTH_TEST);
+
+            var shadowWorldMatrix = m4.lookAt(
+                [0, 5, 0],
+                lightDir,
+                [0, 1, 0]
+            )
+            var shadowProjMatrix = m4.perspective(degToRad(120),
+                gl.canvas.clientWidth / gl.canvas.clientHeight,
+                0.1, 200);
+
+            drawObjects(shadowProjMatrix, shadowWorldMatrix, m4.identity());
+
+            // Render pass
             gl.bindFramebuffer(gl.FRAMEBUFFER, fbInfo.frameBuffer);
             refreshAttr(currProgram);
 
-            // Setup canvas
             resizeCanvasToDisplaySize(gl.canvas);
             gl.viewport(0, 0, fbInfo.width, fbInfo.height);
 
@@ -316,11 +377,20 @@ async function main() {
             cameraMatrix = m4.translate(cameraMatrix, 0, 10, 0)
             var projMatrix = m4.perspective(fov, aspect, zNear, zFar);
 
-            drawObjects(projMatrix, cameraMatrix);
+            var shadowMatrix = m4.translation(0.5, 0.5, 0.5);
+            shadowMatrix = m4.scale(shadowMatrix, 0.5, 0.5, 0.5);
+            shadowMatrix = m4.multiply(shadowMatrix, shadowProjMatrix);
+            shadowMatrix = m4.multiply(shadowMatrix,
+                m4.inverse(shadowWorldMatrix));
+
+            drawObjects(projMatrix, cameraMatrix, shadowMatrix);
         }
 
+        // Post-processing pass
         {
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, fbInfo.depth);
             gl.activeTexture(gl.TEXTURE1);
             gl.bindTexture(gl.TEXTURE_2D, fbInfo.texture);
 
