@@ -201,7 +201,7 @@ async function main() {
             bufferInfo: groundBuffer,
             translation: [0, -10, 0],
             rotation: [degToRad(0), degToRad(0), degToRad(0)],
-            scale: [2, 2, 2],
+            scale: [3, 1, 3],
         },
     ]
 
