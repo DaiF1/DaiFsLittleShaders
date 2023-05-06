@@ -22,9 +22,11 @@
 
             uniform mat4 u_worldViewMatrix;
             uniform mat4 u_world;
+            uniform mat4 u_shadowMatrix;
 
             varying vec4 v_position;
             varying vec2 v_texcoord;
+            varying vec4 v_shadowTexcoord;
             varying vec3 v_normal;
 
             void main() {
@@ -32,6 +34,7 @@
 
                 v_position = u_world * a_position;
                 v_texcoord = a_texcoord;
+                v_shadowTexcoord = u_shadowMatrix * u_world * a_position;
                 v_normal = mat3(u_world) * a_normal;
             }
         </script>
@@ -40,17 +43,29 @@
             precision mediump float;
 
             varying vec2 v_texcoord;
+            varying vec4 v_shadowTexcoord;
             varying vec3 v_normal;
 
             uniform sampler2D u_texture;
+            uniform sampler2D u_shadowTexture;
             uniform vec3 u_reverseLightDir;
 
             void main() {
                 vec3 normal = normalize(v_normal);
                 float light = (1.0 + dot(normal, u_reverseLightDir)) / 2.0;
 
-                gl_FragColor = texture2D(u_texture, v_texcoord);
-                gl_FragColor.rgb *= light;
+                vec3 shadowTexcoord = v_shadowTexcoord.xyz / v_shadowTexcoord.w;
+                bool inRange =
+                    shadowTexcoord.x >= 0.0 &&
+                    shadowTexcoord.x <= 1.0 &&
+                    shadowTexcoord.y >= 0.0 &&
+                    shadowTexcoord.y <= 1.0;
+
+                vec4 texColor = texture2D(u_texture, v_texcoord) * light;
+                vec4 shadowColor = texture2D(u_shadowTexture, shadowTexcoord.xy);
+
+                float projectionAmount = inRange ? 1.0 : 0.0;
+                gl_FragColor = mix(texColor, shadowColor, projectionAmount);
             }
         </script>
 

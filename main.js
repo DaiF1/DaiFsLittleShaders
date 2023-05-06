@@ -133,10 +133,28 @@ async function main() {
 
     var groundBuffer = createBufferInfo(gl, d);
 
+    var lightDir = m4.normalize([0.5, 0.7, -1]);
+    var shadowWorldMatrix = m4.lookAt(
+        [0, 3, 0],
+        lightDir,
+        [0, 1, 0]
+    )
+    var shadowProjMatrix = m4.perspective(degToRad(80),
+        gl.canvas.clientWidth / gl.canvas.clientHeight,
+        0.1, 200);
+    
+    var shadowMatrix = m4.translation(0.5, 0.5, 0.5);
+    shadowMatrix = m4.scale(shadowMatrix, 0.5, 0.5, 0.5);
+    shadowMatrix = m4.multiply(shadowMatrix, shadowProjMatrix);
+    shadowMatrix = m4.multiply(shadowMatrix,
+        m4.inverse(shadowWorldMatrix));
+
     var staticUniforms = {
-        u_reverseLightDir: {data: m4.normalize([0.5, 0.7, -1]), type: "vec3"},
+        u_reverseLightDir: {data: lightDir,      type: "vec3"},
+        u_shadowMatrix:    {data: shadowMatrix,  type: "mat4"},
         u_texture:         {data: 2,             type: "int1"},
-        u_textureHash:     {data: 3,             type: "int1"},
+        u_shadowTexture:   {data: 3,             type: "int1"},
+        u_textureHash:     {data: 4,             type: "int1"},
     }
 
     var changingUniforms = {
@@ -230,20 +248,12 @@ async function main() {
     });
 
     createTexture(gl, "./resources/palette.png", gl.TEXTURE2, gl.LINEAR);
-    createTexture(gl, "./resources/hash.png", gl.TEXTURE3, gl.NEAREST);
+    createTexture(gl, "./resources/hash.png", gl.TEXTURE4, gl.NEAREST);
     var fbInfo = createFrameBufferInfo(gl, gl.canvas.clientWidth, gl.canvas.clientHeight);
 
     // draw function written that way to allow redraw on event later
-    function drawObjects(aspect) {
-        var fov = degToRad(60);
-        var zNear = 1;
-        var zFar = 200;
-        var cameraMatrix = m4.yRotation(cameraHozRot);
-        cameraMatrix = m4.xRotate(cameraMatrix, cameraVertRot);
-        cameraMatrix = m4.translate(cameraMatrix, 0, 10, 0)
-
+    function drawObjects(projMatrix, cameraMatrix) {
         var viewMatrix = m4.inverse(cameraMatrix);
-        var projMatrix = m4.perspective(fov, aspect, zNear, zFar);
         var viewProjMatrix = m4.multiply(projMatrix, viewMatrix)
 
         for (let i = 0; i < objects.length; i++) {
@@ -282,7 +292,7 @@ async function main() {
 
     function drawScene() {
         delta += 0.03;
-
+        
         {
             gl.bindFramebuffer(gl.FRAMEBUFFER, fbInfo.frameBuffer);
             refreshAttr(currProgram);
@@ -297,8 +307,16 @@ async function main() {
             gl.enable(gl.CULL_FACE);
             gl.enable(gl.DEPTH_TEST);
 
+            var fov = degToRad(60);
+            var zNear = 1;
+            var zFar = 200;
             const aspect = fbInfo.width / fbInfo.height;
-            drawObjects(aspect);
+            var cameraMatrix = m4.yRotation(cameraHozRot);
+            cameraMatrix = m4.xRotate(cameraMatrix, cameraVertRot);
+            cameraMatrix = m4.translate(cameraMatrix, 0, 10, 0)
+            var projMatrix = m4.perspective(fov, aspect, zNear, zFar);
+
+            drawObjects(projMatrix, cameraMatrix);
         }
 
         {
