@@ -138,6 +138,17 @@ async function main() {
             debug_panel.style.visibility = "hidden";
     })
 
+    // Debug sliders
+    var sliders = {};
+
+    function setupSlider(id, value) {
+        var slider = document.querySelector(id);
+        console.log(slider);
+        slider.oninput = function() {
+            sliders[value] = this.value;
+        }
+    }
+
     // WebGL setup
     var canvas = document.querySelector('#c')
     var gl = canvas.getContext("webgl")
@@ -271,10 +282,17 @@ async function main() {
         },
     ]
 
+    sliders.cameraX = 0;
+    sliders.cameraY = 10;
+    sliders.cameraZ = 0;
     var cameraVertRot = 0;
     var cameraHozRot = 0;
     var movDelta = 0.01;
     var ctrl = false;
+
+    setupSlider("#camera-x", "cameraX");
+    setupSlider("#camera-y", "cameraY");
+    setupSlider("#camera-z", "cameraZ");
 
     addEventListener("keydown", (event) => {
         ctrl = event.ctrlKey;
@@ -385,7 +403,7 @@ async function main() {
             const aspect = fbInfo.width / fbInfo.height;
             var cameraMatrix = m4.yRotation(cameraHozRot);
             cameraMatrix = m4.xRotate(cameraMatrix, cameraVertRot);
-            cameraMatrix = m4.translate(cameraMatrix, 0, 10, 0)
+            cameraMatrix = m4.translate(cameraMatrix, sliders.cameraX, sliders.cameraY, sliders.cameraZ);
             var projMatrix = m4.perspective(fov, aspect, zNear, zFar);
 
             var shadowMatrix = m4.translation(0.5, 0.5, 0.5);
