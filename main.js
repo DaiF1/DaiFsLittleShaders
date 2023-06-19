@@ -127,6 +127,17 @@ function createTexture(gl, path, activeTex, filter) {
 }
 
 async function main() {
+    // Debug panel
+    var debug_box = document.querySelector("#debug-box");
+    var debug_panel = document.querySelector("#debug");
+
+    debug_box.addEventListener("click", () => {
+        if (debug_box.checked)
+            debug_panel.style.visibility = "visible";
+        else
+            debug_panel.style.visibility = "hidden";
+    })
+
     // WebGL setup
     var canvas = document.querySelector('#c')
     var gl = canvas.getContext("webgl")

@@ -7,13 +7,25 @@
         <title>DaiF's Little Shaders</title>
     </head>
     <body>
-        <select id="shader-select">
-            <option value="default" selected>Default</option>
-            <option value="gooch">Gooch</option>
-            <option value="comics">Comics</option>
-            <option value="drawing">Hand-Drawn</option>
-        </select>
-        <canvas id="c"></canvas>
+        <div id="screen">
+            <div id="topbar">
+            <select id="shader-select">
+                <option value="default" selected>Default</option>
+                <option value="gooch">Gooch</option>
+                <option value="comics">Comics</option>
+                <option value="drawing">Hand-Drawn</option>
+            </select>
+            <div>
+                <input type="checkbox" id="debug-box" name="debug-box">
+                <label for="debug-box">Show Debug Panel</label>
+            </div>
+            </div>
+            <div id="output">
+                <canvas id="c"></canvas>
+                <div id="debug">
+                </div>
+            </div>
+        </div>
         <script type="module" src="/main.js"></script>
         <script id="default-vertex" type="shader/vertex">
             attribute vec4 a_position;
