@@ -5,17 +5,39 @@
         <link rel="icon" type="image/png" href="/DaiFsLittleShaders/dino.png" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>DaiF's Little Shaders</title>
-      <script type="module" crossorigin src="/DaiFsLittleShaders/assets/index-65f42886.js"></script>
-      <link rel="stylesheet" href="/DaiFsLittleShaders/assets/index-27800b8f.css">
+      <script type="module" crossorigin src="/DaiFsLittleShaders/assets/index-9b92ab67.js"></script>
+      <link rel="stylesheet" href="/DaiFsLittleShaders/assets/index-5cc58afb.css">
     </head>
     <body>
-        <select id="shader-select">
-            <option value="default" selected>Default</option>
-            <option value="gooch">Gooch</option>
-            <option value="comics">Comics</option>
-            <option value="drawing">Hand-Drawn</option>
-        </select>
-        <canvas id="c"></canvas>
+        <div id="screen">
+          <div id="help-title">
+            <h1>Press CTRL to lock/unlock camera movement.</h1>
+            <h2 id="lock-status">(currently unlocked)</h2>
+          </div>
+            <div id="topbar">
+            <select id="shader-select">
+                <option value="default" selected>Default</option>
+                <option value="gooch">Gooch</option>
+                <option value="comics">Comics</option>
+                <option value="drawing">Hand-Drawn</option>
+            </select>
+            <div>
+                <input type="checkbox" id="debug-box" name="debug-box">
+                <label for="debug-box">Show Debug Panel</label>
+            </div>
+            </div>
+            <div id="output">
+                <canvas id="c"></canvas>
+                <div id="debug">
+                    <input type="range" min="-100" max="100" value="0" class="slider" id="camera-x">
+                    <label for="camera-x">Camera X</label>
+                    <input type="range" min="-100" max="100" value="10" class="slider" id="camera-y">
+                    <label for="camera-y">Camera Y</label>
+                    <input type="range" min="-100" max="100" value="0" class="slider" id="camera-z">
+                    <label for="camera-z">Camera Z</label>
+                </div>
+            </div>
+        </div>
         
         <script id="default-vertex" type="shader/vertex">
             attribute vec4 a_position;
@@ -24,9 +46,11 @@
 
             uniform mat4 u_worldViewMatrix;
             uniform mat4 u_world;
+            uniform mat4 u_shadowMatrix;
 
             varying vec4 v_position;
             varying vec2 v_texcoord;
+            varying vec4 v_shadowTexcoord;
             varying vec3 v_normal;
 
             void main() {
@@ -34,6 +58,7 @@
 
                 v_position = u_world * a_position;
                 v_texcoord = a_texcoord;
+                v_shadowTexcoord = u_shadowMatrix * u_world * a_position;
                 v_normal = mat3(u_world) * a_normal;
             }
         </script>
@@ -42,49 +67,31 @@
             precision mediump float;
 
             varying vec2 v_texcoord;
+            varying vec4 v_shadowTexcoord;
             varying vec3 v_normal;
 
             uniform sampler2D u_texture;
+            uniform sampler2D u_shadowTexture;
             uniform vec3 u_reverseLightDir;
 
             void main() {
                 vec3 normal = normalize(v_normal);
                 float light = (1.0 + dot(normal, u_reverseLightDir)) / 2.0;
 
-                gl_FragColor = texture2D(u_texture, v_texcoord);
-                gl_FragColor.rgb *= light;
-            }
-        </script>
+                vec3 shadowTexcoord = v_shadowTexcoord.xyz / v_shadowTexcoord.w;
+                float currDepth = shadowTexcoord.z;
 
-        <script id="vertex-depth" type="shader/vertex">
-            attribute vec4 a_position;
-            attribute vec3 a_normal;
+                bool inRange =
+                    shadowTexcoord.x >= 0.0 &&
+                    shadowTexcoord.x <= 1.0 &&
+                    shadowTexcoord.y >= 0.0 &&
+                    shadowTexcoord.y <= 1.0;
 
-            uniform mat4 u_worldViewMatrix;
-            uniform mat4 u_world;
+                vec4 texColor = texture2D(u_texture, v_texcoord) * light;
+                float projDepth = texture2D(u_shadowTexture, shadowTexcoord.xy).r;
+                float shadowLight = (inRange && projDepth <= currDepth) ? 0.0 : 1.0;
 
-            varying float v_depth;
-            varying vec3 v_normal;
-
-            void main() {
-                gl_Position = u_worldViewMatrix * a_position;
-
-                v_depth = gl_Position.z;
-                v_normal = mat3(u_world) * a_normal;
-            }
-        </script>
-
-        <script id="fragment-depth" type="shader/fragment">
-            precision mediump float;
-
-            varying float v_depth;
-            varying vec3 v_normal;
-
-            float zFar = 200.0;
-
-            void main() {
-                vec3 color = vec3(1.0 - v_depth / zFar);
-                gl_FragColor = vec4(color, 1);
+                gl_FragColor = vec4(texColor.rgb * shadowLight, texColor.a);
             }
         </script>
 
@@ -244,7 +251,7 @@
                 vec3 bottomColor = texture2D(u_depthTexture, v_texcoord + vec2(0, -h)).rgb;
 
                 vec2 gradient = vec2(length(rightColor - leftColor), length(topColor - bottomColor));
-                float outline = 1.0 - step(0.05, length(gradient));
+                float outline = 1.0 - step(0.01, length(gradient));
 
                 vec3 color = vec3(outline) * texture2D(u_screenTexture, v_texcoord).rgb;
                 gl_FragColor = vec4(color, 1.0);
