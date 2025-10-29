@@ -31,3 +31,21 @@ html, body {
     z-index: 10;
     visibility: hidden;
 }
+
+#help-title {
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: black;
+    z-index: 10;
+    width: 100%;
+    text-align: center;
+}
+
+#help-title h1 {
+    margin-bottom: 0;
+}
+
+#help-title h2 {
+    margin-top: 0;
+}

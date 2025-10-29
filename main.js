@@ -130,6 +130,7 @@ async function main() {
     // Debug panel
     var debug_box = document.querySelector("#debug-box");
     var debug_panel = document.querySelector("#debug");
+    const lock_display = document.getElementById("lock-status");
 
     debug_box.addEventListener("click", () => {
         if (debug_box.checked)
@@ -288,18 +289,16 @@ async function main() {
     var cameraVertRot = 0;
     var cameraHozRot = 0;
     var movDelta = 0.01;
-    var ctrl = false;
+    var ctrl = true;
 
     setupSlider("#camera-x", "cameraX");
     setupSlider("#camera-y", "cameraY");
     setupSlider("#camera-z", "cameraZ");
 
     addEventListener("keydown", (event) => {
-        ctrl = event.ctrlKey;
-    });
-
-    addEventListener("keyup", (event) => {
-        ctrl = event.ctrlKey;
+        if (!event.ctrlKey) return;
+        ctrl = !ctrl;
+        lock_display.innerText = `(currently ${ctrl ? "unlocked" : "locked"})`;
     });
 
     addEventListener("mousemove", (event) => {
