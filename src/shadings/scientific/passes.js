@@ -8,6 +8,7 @@ import { Scene } from "../../renderer/scene";
 
 import renderVert from "./shaders/render.vert.js"
 import renderFrag from "./shaders/render.frag.js"
+import { Texture } from "../../renderer/texture.js";
 
 let renderGraph;
 
@@ -55,6 +56,7 @@ export function loadScientificShading(scene, mainCamera) {
     ]);
     */
 
+    const palette = new Texture("./resources/vanilla-milkshake-1x.png", "u_palette");
     let renderPass = new RenderPass(scene,
         {
             vertex: renderVert,
@@ -62,6 +64,9 @@ export function loadScientificShading(scene, mainCamera) {
         },
         {
             camera: mainCamera,
+            textures: [
+                palette,
+            ],
         });
 
     renderGraph = new RenderGraph([

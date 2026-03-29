@@ -36,6 +36,8 @@ export class RenderPass
         this.in = params.in ?? [];
         this.out = params.out ?? [];
         this.camera = params.camera ?? null;
+
+        this.textures = params.textures ?? [];
     }
 
     compileShader(vertex, fragment) {
@@ -55,6 +57,11 @@ export class RenderPass
             if (screenResized)
                 this.camera.recalculateMatrix();
             this.camera.bindUniforms(this.program);
+        }
+
+        for (let id in this.textures) {
+            const tex = this.textures[id];
+            tex.bind(this.program, id);
         }
 
         this.scene.render(this.program);

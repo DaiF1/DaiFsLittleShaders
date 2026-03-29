@@ -113,6 +113,20 @@ export class Mesh
         gl.enableVertexAttribArray(posAttribLocation);
         gl.vertexAttribPointer(posAttribLocation, 3, gl.FLOAT, false, 0, 0);
 
+        let normalAttribLocation = gl.getAttribLocation(program, "a_normal");
+        let normalBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.normals), gl.STATIC_DRAW);
+        gl.enableVertexAttribArray(normalAttribLocation);
+        gl.vertexAttribPointer(normalAttribLocation, 3, gl.FLOAT, false, 0, 0);
+
+        let uvAttribLocation = gl.getAttribLocation(program, "a_uv");
+        let uvBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.uvs), gl.STATIC_DRAW);
+        gl.enableVertexAttribArray(uvAttribLocation);
+        gl.vertexAttribPointer(uvAttribLocation, 2, gl.FLOAT, false, 0, 0);
+
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
         gl.bindVertexArray(null);
 
