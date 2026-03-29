@@ -37,6 +37,9 @@ export class RenderCamera
 
         let projectionUniformLoc = gl.getUniformLocation(program, "u_projectionMatrix");
         gl.uniformMatrix4fv(projectionUniformLoc, false, this.projMatrix);
+
+        let positionUniformLoc = gl.getUniformLocation(program, "u_cameraPosition");
+        gl.uniformMatrix4fv(positionUniformLoc, false, this.position);
     }
 
     moveCamera(newPosition, newTarget) {

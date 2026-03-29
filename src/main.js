@@ -13,7 +13,11 @@ async function main() {
     initWebGL();
     const planet = new SceneMesh(await Mesh.fromOBJ("./resources/planet.obj"), [-11, -36, 0]);
     const car = new SceneMesh(await Mesh.fromOBJ("./resources/car.obj"), [8, -1.5, 0], [0, 0, -degToRad(29)]);
-    const scene = new Scene([planet, car]);
+    const scene = new Scene([planet, car], {
+        directional: [
+            { direction: [-1, -10, -3], color: [1, 1, 1], intensity: 1 },
+        ]
+    });
 
     const mainCamera = new RenderCamera(PERSPECTIVE_CAMERA);
 
