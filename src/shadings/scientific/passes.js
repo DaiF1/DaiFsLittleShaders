@@ -1,3 +1,5 @@
+import "./style.css"
+
 import { PERSPECTIVE_CAMERA, RenderCamera } from "../../renderer/render_camera";
 import { RenderGraph } from "../../renderer/render_graph";
 import { RenderPass } from "../../renderer/render_pass";
@@ -53,7 +55,7 @@ export function loadScientificShading(scene) {
     ]);
     */
 
-    let renderCamera = new RenderCamera(PERSPECTIVE_CAMERA, { fov: 60 });
+    let renderCamera = new RenderCamera(PERSPECTIVE_CAMERA, {});
     let renderPass = new RenderPass(scene,
         {
             vertex: renderVert,

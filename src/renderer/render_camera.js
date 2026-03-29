@@ -10,7 +10,7 @@ export class RenderCamera
     constructor(type, params = {}) {
         this.type = type
         if (type === PERSPECTIVE_CAMERA) {
-            this.fov = params.fov ? degToRad(params.fov) : degToRad(45);
+            this.fov = params.fov ? degToRad(params.fov) : degToRad(30);
             this.near = params.near ?? 1;
             this.far = params.far ?? 2000;
 
@@ -21,8 +21,8 @@ export class RenderCamera
             // TODO
         }
 
-        this.position = params.position ?? [0, 0, 0];
-        this.target = params.target ?? [0, 0, -1];
+        this.position = params.position ?? [35, 0, 0];
+        this.target = params.target ?? [0, 0, 0];
         this.up = params.up ?? [0, 1, 0];
 
         this.cameraMatrix = m4.lookAt(this.position, this.target, this.up);
