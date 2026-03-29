@@ -1,4 +1,4 @@
-import { gl } from "../gl";
+import { gl } from "./gl";
 
 function createShader(type, source) {
     let shader = gl.createShader(type);
@@ -45,14 +45,17 @@ export class RenderPass
         return createProgram(vertexShader, fragmentShader);
     }
 
-    run() {
-        // gl.enable(gl.CULL_FACE); // TODO: add an option for backface, frontface, both
-        // gl.enable(gl.DEPTH_TEST); // TODO: add an option for depth test
+    run(screenResized) {
+        gl.enable(gl.CULL_FACE); // TODO: add an option for backface, frontface, both
+        gl.enable(gl.DEPTH_TEST); // TODO: add an option for depth test
 
         gl.useProgram(this.program);
 
-        if (this.camera != null)
+        if (this.camera != null) {
+            if (screenResized)
+                this.camera.recalculateMatrix();
             this.camera.bindUniforms(this.program);
+        }
 
         this.scene.render(this.program);
     }

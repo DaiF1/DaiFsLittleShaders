@@ -1,4 +1,4 @@
-import { gl } from "../gl";
+import { gl } from "./gl";
 import { degToRad } from "../utils";
 import { m4 } from "./m4";
 

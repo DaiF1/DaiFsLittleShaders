@@ -1,5 +1,5 @@
-import { gl } from "../gl";
-import { degToRad } from "../utils";
+import { gl } from "./gl";
+import { degToRad, vecLerp } from "../utils";
 import { m4 } from "./m4";
 
 export const PERSPECTIVE_CAMERA = "perspective"
@@ -27,6 +27,8 @@ export class RenderCamera
 
         this.cameraMatrix = m4.lookAt(this.position, this.target, this.up);
         this.viewMatrix = m4.inverse(this.cameraMatrix);
+
+        this.needsUpdate = false;
     }
 
     bindUniforms(program) {
@@ -35,5 +37,43 @@ export class RenderCamera
 
         let projectionUniformLoc = gl.getUniformLocation(program, "u_projectionMatrix");
         gl.uniformMatrix4fv(projectionUniformLoc, false, this.projMatrix);
+    }
+
+    moveCamera(newPosition, newTarget) {
+        this.startPosition = this.position;
+        this.targetPosition = newPosition;
+        this.startTarget = this.target;
+        this.targetTarget = newTarget;
+
+        this.needsUpdate = true;
+        this.timeElapsed = 0.0;
+    }
+
+    update(dt) {
+        if (!this.needsUpdate)
+            return;
+
+        this.timeElapsed += dt;
+        if (this.timeElapsed >= 1.0)
+            this.timeElapsed = 1.0;
+
+        this.position = vecLerp(this.startPosition, this.targetPosition, this.timeElapsed);
+        this.target = vecLerp(this.startTarget, this.targetTarget, this.timeElapsed);
+
+        this.cameraMatrix = m4.lookAt(this.position, this.target, this.up);
+        this.viewMatrix = m4.inverse(this.cameraMatrix);
+
+        if (this.timeElapsed >= 1.0)
+            this.needsUpdate = false;
+    }
+
+    recalculateMatrix() {
+        if (this.type === PERSPECTIVE_CAMERA) {
+            const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+            this.projMatrix = m4.perspective(this.fov, aspect, this.near, this.far);
+        }
+        else if (this.type === ORTHOGRAPHIC_CAMERA) {
+            // TODO
+        }
     }
 };

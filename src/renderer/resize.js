@@ -1,4 +1,4 @@
-export let gl = null;
+import { gl } from "./gl"
 
 /* Found on WebGLFundamentals */
 const canvasToDisplaySizeMap = new Map();
@@ -48,24 +48,13 @@ export function resizeCanvasToDisplaySize(canvas) {
         // Make the canvas the same size
         canvas.width  = displayWidth;
         canvas.height = displayHeight;
+        gl.viewport(0, 0, canvas.width, canvas.height);
     }
 
     return needResize;
 }
 
-export function initWebGL() {
-    let canvas = document.getElementById("c");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    gl = canvas.getContext("webgl2");
-    gl.viewport(0, 0, canvas.width, canvas.height);
-
-    if (!gl) {
-        console.error("Does not support webgl2");
-        return;
-    }
-
+export function initResizeObserver(canvas) {
     canvasToDisplaySizeMap.set(canvas, [canvas.width, canvas.height]);
 
     const resizeObserver = new ResizeObserver(onResize);
@@ -73,5 +62,3 @@ export function initWebGL() {
 
     resizeCanvasToDisplaySize(canvas);
 }
-
-

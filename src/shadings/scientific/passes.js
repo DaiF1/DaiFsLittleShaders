@@ -11,7 +11,7 @@ import renderFrag from "./shaders/render.frag.js"
 
 let renderGraph;
 
-export function loadScientificShading(scene) {
+export function loadScientificShading(scene, mainCamera) {
     /*
     let color = new RenderTarget(COLOR_TARGET);
     let shadow = new RenderTarget(DEPTH_TARGET);
@@ -55,14 +55,13 @@ export function loadScientificShading(scene) {
     ]);
     */
 
-    let renderCamera = new RenderCamera(PERSPECTIVE_CAMERA, {});
     let renderPass = new RenderPass(scene,
         {
             vertex: renderVert,
             fragment: renderFrag,
         },
         {
-            camera: renderCamera,
+            camera: mainCamera,
         });
 
     renderGraph = new RenderGraph([

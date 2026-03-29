@@ -1,4 +1,5 @@
-import { gl, resizeCanvasToDisplaySize } from "../gl";
+import { gl } from "./gl";
+import { resizeCanvasToDisplaySize } from "./resize";
 
 export class RenderGraph
 {
@@ -7,7 +8,7 @@ export class RenderGraph
     }
 
     render() {
-        resizeCanvasToDisplaySize(gl.canvas);
+        const resized = resizeCanvasToDisplaySize(gl.canvas);
 
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
         gl.clearColor(0, 0, 0, 0);
@@ -21,7 +22,7 @@ export class RenderGraph
                 // Disable framebuffer just in case
             }
 
-            pass.run();
+            pass.run(resized);
         }
     }
 };
