@@ -1,18 +1,22 @@
 import "./style.css"
 
-import { PERSPECTIVE_CAMERA, RenderCamera } from "../../renderer/render_camera";
-import { RenderGraph } from "../../renderer/render_graph";
-import { RenderPass } from "../../renderer/render_pass";
-import { COLOR_TARGET, DEPTH_TARGET, RenderTarget } from "../../renderer/render_target";
-import { Scene } from "../../renderer/scene";
-
 import renderVert from "./shaders/render.vert.js"
 import renderFrag from "./shaders/render.frag.js"
+
+import shadowVert from "../common/shadow.vert.js"
+import shadowFrag from "../common/shadow.frag.js"
+
+import { RenderGraph } from "../../renderer/render_graph";
+import { RenderPass } from "../../renderer/render_pass";
+import { COLOR_TARGET, DEPTH_TARGET, RenderTexture } from "../../renderer/render_texture";
 import { Texture } from "../../renderer/texture.js";
+import { ORTHOGRAPHIC_CAMERA, RenderCamera } from "../../renderer/render_camera.js"
+import { normalize } from "../../utils.js"
+import { Shader } from "../../renderer/shader.js"
 
 let renderGraph;
 
-export function loadScientificShading(scene, mainCamera) {
+export function loadScientificShading(scene, mainCamera, sunDir) {
     /*
     let color = new RenderTarget(COLOR_TARGET);
     let shadow = new RenderTarget(DEPTH_TARGET);
@@ -56,21 +60,53 @@ export function loadScientificShading(scene, mainCamera) {
     ]);
     */
 
+    let shadowDepth = new RenderTexture(DEPTH_TARGET, [2048, 2048], "u_shadow");
+
+    const sun = normalize(sunDir);
+    const sceneSize = 40;
+    const shadowCamPos = [-sun[0] * sceneSize, -sun[1] * sceneSize, -sun[2] * sceneSize];
+    const up = Math.abs(sun.y) > 0.99 ? [1, 0, 0] : [0, 1, 0];
+
+    const extent = sceneSize * 1.2;
+    let shadowCamera = new RenderCamera(ORTHOGRAPHIC_CAMERA, {
+        position: shadowCamPos,
+        target: [0, 0, 0],
+        up: up,
+
+        near: 0.1,
+        far: sceneSize * 4,
+        left: -extent,
+        right: extent,
+        top: -extent,
+        bottom: extent,
+    });
+    let shadowPass = new RenderPass(scene,
+        new Shader(shadowVert, shadowFrag),
+        {
+            renderSize: [2048, 2048],
+            camera: shadowCamera,
+            out: {
+                depth: shadowDepth,
+            }
+        });
+
     const palette = new Texture("./resources/vanilla-milkshake-1x.png", "u_palette");
     let renderPass = new RenderPass(scene,
-        {
-            vertex: renderVert,
-            fragment: renderFrag,
-        },
+        new Shader(renderVert, renderFrag),
         {
             camera: mainCamera,
             textures: [
+                shadowDepth,
                 palette,
             ],
+            uniforms: [
+                { name: 'u_shadowViewProj', type: 'm4', value: shadowCamera.viewProjMatrix },
+            ]
         });
 
     renderGraph = new RenderGraph([
-        renderPass
+        shadowPass,
+        renderPass,
     ]);
 }
 

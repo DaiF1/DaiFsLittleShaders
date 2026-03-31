@@ -1,6 +1,4 @@
 import { gl } from "./gl";
-import { Mesh } from "./mesh";
-import { SceneMesh } from "./scene_mesh";
 
 const MAX_LIGHT_COUNT = 10;
 
@@ -12,7 +10,8 @@ export class Scene
         this.pointLights = lights.point ?? [];
     }
 
-    render(program) {
+    render(shader) {
+        const program = shader.program;
 
         const dirLightCount = Math.min(MAX_LIGHT_COUNT, this.directionalLights.length);
         const dirLightCountLoc = gl.getUniformLocation(program, "u_dirLightCount");
@@ -45,7 +44,7 @@ export class Scene
         }
 
         for (let obj of this.objects)
-            obj.draw(program);
+            obj.draw(shader);
     }
 
     static getPostProcessPlane() {

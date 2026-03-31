@@ -24,11 +24,12 @@ export class SceneMesh
         this.matrix = m4.multiply(this.positionMat, m4.multiply(this.scaleMat, this.rotationMat));
     }
 
-    draw(program) {
-        let matrixLocation = gl.getUniformLocation(program, "u_modelMatrix");
-        gl.uniformMatrix4fv(matrixLocation, false, this.matrix);
+    draw(shader) {
+        let matrixLocation = gl.getUniformLocation(shader.program, "u_modelMatrix");
+        if (matrixLocation != null)
+            gl.uniformMatrix4fv(matrixLocation, false, this.matrix);
 
-        this.mesh.draw(program);
+        this.mesh.draw(shader);
     }
 
     rotateX(deg) {

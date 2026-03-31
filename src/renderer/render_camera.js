@@ -18,7 +18,16 @@ export class RenderCamera
             this.projMatrix = m4.perspective(this.fov, aspect, this.near, this.far);
         }
         else if (type === ORTHOGRAPHIC_CAMERA) {
-            // TODO
+            this.left = params.left ?? -100;
+            this.right = params.right ?? 100;
+            this.bottom = params.left ?? 100;
+            this.top = params.right ?? -100;
+            this.far = params.far ?? -400;
+            this.near = params.near ?? 400;
+            this.projMatrix = m4.orthographic(this.left, this.right,
+                this.bottom, this.top,
+                this.near, this.far
+            );
         }
 
         this.position = params.position ?? [35, 0, 0];
@@ -33,13 +42,16 @@ export class RenderCamera
 
     bindUniforms(program) {
         let viewUniformLoc = gl.getUniformLocation(program, "u_viewMatrix");
-        gl.uniformMatrix4fv(viewUniformLoc, false, this.viewMatrix);
+        if (viewUniformLoc != null)
+            gl.uniformMatrix4fv(viewUniformLoc, false, this.viewMatrix);
 
         let projectionUniformLoc = gl.getUniformLocation(program, "u_projectionMatrix");
-        gl.uniformMatrix4fv(projectionUniformLoc, false, this.projMatrix);
+        if (projectionUniformLoc != null)
+            gl.uniformMatrix4fv(projectionUniformLoc, false, this.projMatrix);
 
         let positionUniformLoc = gl.getUniformLocation(program, "u_cameraPosition");
-        gl.uniformMatrix4fv(positionUniformLoc, false, this.position);
+        if (positionUniformLoc != null)
+            gl.uniformMatrix4fv(positionUniformLoc, false, this.position);
     }
 
     moveCamera(newPosition, newTarget) {
@@ -78,5 +90,9 @@ export class RenderCamera
         else if (this.type === ORTHOGRAPHIC_CAMERA) {
             // TODO
         }
+    }
+
+    get viewProjMatrix() {
+        return m4.multiply(this.projMatrix, this.viewMatrix);
     }
 };
