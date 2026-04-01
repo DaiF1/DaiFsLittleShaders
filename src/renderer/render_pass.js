@@ -8,6 +8,17 @@ function bindUniform(location, type, value) {
     }
 }
 
+function stringToCullFace(s) {
+    switch (s) {
+        case "front":
+            return gl.FRONT;
+        case "back":
+            return gl.BACK;
+        case "double":
+            return gl.FRONT_AND_BACK;
+    }
+}
+
 export class RenderPass
 {
     constructor(scene, shader, params) {
@@ -24,10 +35,17 @@ export class RenderPass
 
         this.textures = params.textures ?? [];
         this.uniforms = params.uniforms ?? [];
+
+        this.cullface = params.cullface ?? "back";
     }
 
     run(screenResized) {
-        gl.enable(gl.CULL_FACE); // TODO: add an option for backface, frontface, both
+        if (this.cullface !== "none") {
+            gl.enable(gl.CULL_FACE);
+            gl.cullFace(stringToCullFace(this.cullface));
+        } else
+            gl.disable(gl.CULL_FACE);
+
         gl.enable(gl.DEPTH_TEST); // TODO: add an option for depth test
 
         gl.useProgram(this.shader.program);

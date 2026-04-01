@@ -5,7 +5,7 @@ export const DEPTH_TARGET = "depth";
 
 export class RenderTexture
 {
-    constructor(target, size, uniformName = "") {
+    constructor(target, size, uniformName, params) {
         this.uniformName = uniformName;
         this.target = target;
 
@@ -14,19 +14,23 @@ export class RenderTexture
         this.texture = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
 
-        // define size and format of level 0
-        const internalFormat = target === DEPTH_TARGET ? gl.DEPTH_COMPONENT32F : gl.RGBA
-        const format = target === DEPTH_TARGET ? gl.DEPTH_COMPONENT : gl.RGBA;
-        const type = target === DEPTH_TARGET ? gl.FLOAT : gl.UNSIGNED_BYTE;
-        gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat,
-            targetTextureWidth, targetTextureHeight, 0,
-            format, type, null);
+        if (target === COLOR_TARGET) {
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA,
+                targetTextureWidth, targetTextureHeight, 0,
+                gl.RGBA, gl.UNSIGNED_BYTE, null);
+        }
+        else {
+            gl.texStorage2D(gl.TEXTURE_2D, 1, gl.DEPTH_COMPONENT32F,
+                targetTextureWidth, targetTextureHeight);
+        }
 
-        // set the filtering so we don't need mips
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+        if (params.compareMode) {
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_MODE, gl.COMPARE_REF_TO_TEXTURE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_FUNC, gl.LEQUAL);
+        }
 
         gl.bindTexture(gl.TEXTURE_2D, null);
     }

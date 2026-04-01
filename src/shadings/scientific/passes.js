@@ -60,7 +60,9 @@ export function loadScientificShading(scene, mainCamera, sunDir) {
     ]);
     */
 
-    let shadowDepth = new RenderTexture(DEPTH_TARGET, [2048, 2048], "u_shadow");
+    const depthTextureSize = 4096;
+    let shadowDepth = new RenderTexture(DEPTH_TARGET,
+        [depthTextureSize, depthTextureSize], "u_shadow", { compareMode: true });
 
     const sun = normalize(sunDir);
     const sceneSize = 40;
@@ -83,11 +85,12 @@ export function loadScientificShading(scene, mainCamera, sunDir) {
     let shadowPass = new RenderPass(scene,
         new Shader(shadowVert, shadowFrag),
         {
-            renderSize: [2048, 2048],
+            renderSize: [depthTextureSize, depthTextureSize],
             camera: shadowCamera,
             out: {
                 depth: shadowDepth,
-            }
+            },
+            cullface: "front",
         });
 
     const palette = new Texture("./resources/vanilla-milkshake-1x.png", "u_palette");
