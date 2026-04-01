@@ -28,13 +28,7 @@ export class Texture
         gl.bindTexture(gl.TEXTURE_2D, null);
     }
 
-    bind(program, index) {
-        let uniformLocation = gl.getUniformLocation(program, this.uniformName);
-        if (uniformLocation == null)
-            return;
-
-        gl.uniform1i(uniformLocation, index);
-
+    bind(index) {
         gl.activeTexture(gl.TEXTURE0 + parseInt(index));
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
     }

@@ -5,12 +5,11 @@ export const DEPTH_TARGET = "depth";
 
 export class RenderTexture
 {
-    constructor(target, size, uniformName, params) {
-        this.uniformName = uniformName;
+    constructor(target, size, params) {
         this.target = target;
 
-        const targetTextureWidth = size[0];
-        const targetTextureHeight = size[1];
+        const targetTextureWidth = size != null ? size[0] : gl.canvas.width;
+        const targetTextureHeight = size != null ? size[1] : gl.canvas.height;
         this.texture = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
 
@@ -27,7 +26,7 @@ export class RenderTexture
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
-        if (params.compareMode) {
+        if (params && params.compareMode) {
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_MODE, gl.COMPARE_REF_TO_TEXTURE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_FUNC, gl.LEQUAL);
         }
@@ -35,13 +34,7 @@ export class RenderTexture
         gl.bindTexture(gl.TEXTURE_2D, null);
     }
 
-    bind(program, index) {
-        let uniformLocation = gl.getUniformLocation(program, this.uniformName);
-        if (uniformLocation == null)
-            return;
-
-        gl.uniform1i(uniformLocation, index);
-
+    bind(index) {
         gl.activeTexture(gl.TEXTURE0 + parseInt(index));
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
     }

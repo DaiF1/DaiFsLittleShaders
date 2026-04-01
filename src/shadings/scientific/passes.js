@@ -62,7 +62,7 @@ export function loadScientificShading(scene, mainCamera, sunDir) {
 
     const depthTextureSize = 4096;
     let shadowDepth = new RenderTexture(DEPTH_TARGET,
-        [depthTextureSize, depthTextureSize], "u_shadow", { compareMode: true });
+        [depthTextureSize, depthTextureSize], { compareMode: true });
 
     const sun = normalize(sunDir);
     const sceneSize = 40;
@@ -93,16 +93,14 @@ export function loadScientificShading(scene, mainCamera, sunDir) {
             cullface: "front",
         });
 
-    const palette = new Texture("./resources/vanilla-milkshake-1x.png", "u_palette");
+    const palette = new Texture("./resources/vanilla-milkshake-1x.png");
     let renderPass = new RenderPass(scene,
         new Shader(renderVert, renderFrag),
         {
             camera: mainCamera,
-            textures: [
-                shadowDepth,
-                palette,
-            ],
             uniforms: [
+                { name: 'u_shadow', type: 't', value: shadowDepth },
+                { name: 'u_palette', type: 't', value: palette },
                 { name: 'u_shadowViewProj', type: 'm4', value: shadowCamera.viewProjMatrix },
             ]
         });
