@@ -41,4 +41,13 @@ float shadowMapping(sampler2DShadow shadowTex, vec3 position, mat4 shadowProj) {
 
     return shadow;
 }
+
+float sqr(float a) {
+    return a * a;
+}
+
+float attenuation(float distance, float radius) {
+    float x = min(distance, radius);
+    return sqr(1.0 - sqr(sqr(x / radius))) / (sqr(x) + 1.0);
+}
 `;

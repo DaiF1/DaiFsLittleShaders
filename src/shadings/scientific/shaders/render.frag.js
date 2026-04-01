@@ -40,15 +40,23 @@ void main() {
     for (int i = 0; i < u_dirLightCount; i++)
     {
         DirectionalLight light = u_dirLights[i];
-        intensity += dot(normalize(light.direction), v_normal) * light.intensity;
+        intensity += max(dot(normalize(light.direction), v_normal) * light.intensity, 0.0);
     }
 
     for (int i = 0; i < u_pointLightCount; i++)
     {
         PointLight light = u_pointLights[i];
-        intensity += dot(normalize(light.position - v_position), v_normal) * light.intensity;
+        vec3 dir = light.position - v_position;
+        float dist = length(dir);
+        dir /= dist;
+
+        float att = attenuation(dist, light.intensity * 10.0);
+        if (att <= 0.0f)
+            continue;
+
+        intensity += max(dot(dir, v_normal) * att, 0.0);
+        diffuse += light.color * att;
     }
-    intensity = 1.0 - intensity;
 
     float shadow = shadowMapping(u_shadow, v_position, u_shadowViewProj);
 

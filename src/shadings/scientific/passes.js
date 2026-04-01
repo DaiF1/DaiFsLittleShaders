@@ -66,7 +66,7 @@ export function loadScientificShading(scene, mainCamera, sunDir) {
 
     const sun = normalize(sunDir);
     const sceneSize = 40;
-    const shadowCamPos = [-sun[0] * sceneSize, -sun[1] * sceneSize, -sun[2] * sceneSize];
+    const shadowCamPos = [sun[0] * sceneSize, sun[1] * sceneSize, sun[2] * sceneSize];
     const up = Math.abs(sun.y) > 0.99 ? [1, 0, 0] : [0, 1, 0];
 
     const extent = sceneSize * 1.2;

@@ -14,11 +14,18 @@ async function main() {
     const planet = new SceneMesh(await Mesh.fromOBJ("./resources/planet.obj"), [-11, -36, 0]);
     const car = new SceneMesh(await Mesh.fromOBJ("./resources/car.obj"), [8, -1.5, 0], [0, 0, -degToRad(29)]);
 
-    const sunDir = [2, -10, 6];
+    const sunDir = [-2, 10, -6];
     const scene = new Scene([car, planet], {
         directional: [
             { direction: sunDir, color: [1, 1, 1], intensity: 1 },
-        ]
+        ],
+        point: [/*
+            { position: [9.6, -3, 0.78], color: [1, 0, 0], intensity: 0.2 },
+            { position: [9.6, -3, -0.78], color: [1, 0, 0], intensity: 0.2 },
+            { position: [5.3, -0.5, 0.7], color: [1, 1, 0], intensity: 0.7 },
+            { position: [5.3, -0.5, -0.7], color: [1, 1, 0], intensity: 0.7 },
+            */
+        ],
     });
 
     const mainCamera = new RenderCamera(PERSPECTIVE_CAMERA);
