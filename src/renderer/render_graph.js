@@ -23,6 +23,9 @@ export class RenderGraph
                 const colors = pass.out.colors ?? [];
                 for (let i = 0; i < colors.length; i++) {
                     const tex = colors[i];
+                    if (resized)
+                        tex.resize(width, height);
+
                     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + i,
                         gl.TEXTURE_2D, tex.texture, 0);
                 }
