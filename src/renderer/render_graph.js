@@ -2,6 +2,19 @@ import { gl } from "./gl";
 import { DEPTH_TARGET, RenderTexture } from "./render_texture";
 import { resizeCanvasToDisplaySize } from "./resize";
 
+function framebufferErrorToString(status) {
+    switch (status) {
+        case gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+            return "INCOMPLETE_ATTACHMENT";
+        case gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+            return "INCOMPLETE_MISSING_ATTACHMENT";
+        case gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
+            return "INCOMPLETE_DIMENSIONS";
+        case gl.FRAMEBUFFER_UNSUPPORTED:
+            return "UNSUPPORTED";
+    }
+}
+
 export class RenderGraph
 {
     constructor(passes) {
@@ -32,9 +45,18 @@ export class RenderGraph
                     attachments.push(gl.COLOR_ATTACHMENT0 + i);
                 }
 
-                const depth = pass.out.depth ?? new RenderTexture(DEPTH_TARGET, { renderSize: [width, height] }); // TODO: replace with renderbuffer
+                let depth = pass.out.depth;
+                if (depth == null) {
+                    depth = new RenderTexture(DEPTH_TARGET, { renderSize: [width, height] }); // TODO: replace with renderbuffer
+                } else if (resized) {
+                    depth.resize(width, height);
+                }
                 gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT,
                     gl.TEXTURE_2D, depth.texture, 0);
+
+                const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+                if (status !== gl.FRAMEBUFFER_COMPLETE)
+                    console.error(`Invalid Framebuffer (status: ${framebufferErrorToString(status)}).`);
 
                 gl.drawBuffers(attachments);
             }
