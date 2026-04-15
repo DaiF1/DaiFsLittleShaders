@@ -21,6 +21,7 @@ export class RenderGraph
                 gl.bindFramebuffer(gl.FRAMEBUFFER, this.currentFB);
 
                 const colors = pass.out.colors ?? [];
+                const attachments = []
                 for (let i = 0; i < colors.length; i++) {
                     const tex = colors[i];
                     if (resized)
@@ -28,14 +29,18 @@ export class RenderGraph
 
                     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + i,
                         gl.TEXTURE_2D, tex.texture, 0);
+                    attachments.push(gl.COLOR_ATTACHMENT0 + i);
                 }
 
-                const depth = pass.out.depth ?? new RenderTexture(DEPTH_TARGET, [width, height]); // TODO: replace with renderbuffer
+                const depth = pass.out.depth ?? new RenderTexture(DEPTH_TARGET, { renderSize: [width, height] }); // TODO: replace with renderbuffer
                 gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT,
                     gl.TEXTURE_2D, depth.texture, 0);
+
+                gl.drawBuffers(attachments);
             }
             else {
                 gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+                gl.drawBuffers([gl.BACK]);
             }
 
             gl.viewport(0, 0, width, height);
