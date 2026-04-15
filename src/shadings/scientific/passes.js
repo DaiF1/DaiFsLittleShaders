@@ -3,6 +3,9 @@ import "./style.css"
 import renderVert from "./shaders/render.vert.js"
 import renderFrag from "./shaders/render.frag.js"
 
+import outlineVert from "./shaders/outline.vert.js"
+import outlineFrag from "./shaders/outline.frag.js"
+
 import shadowVert from "../common/shadow.vert.js"
 import shadowFrag from "../common/shadow.frag.js"
 
@@ -13,56 +16,17 @@ import { Texture } from "../../renderer/texture.js";
 import { ORTHOGRAPHIC_CAMERA, RenderCamera } from "../../renderer/render_camera.js"
 import { normalize } from "../../utils.js"
 import { Shader } from "../../renderer/shader.js"
+import { Scene } from "../../renderer/scene.js"
 
 let renderGraph;
 
 export function loadScientificShading(scene, mainCamera, sunDir) {
-    /*
-    let color = new RenderTarget(COLOR_TARGET);
-    let shadow = new RenderTarget(DEPTH_TARGET);
-
-    let shadowCamera = new RenderCamera();
-    let renderCamera = new RenderCamera();
-
-    let shadowPass = new RenderPass(scene,
-        {
-            vertex: "",
-            fragment: "",
-        },
-        {
-            camera: shadowCamera,
-            out: [shadow],
-        });
-    let renderPass = new RenderPass(scene,
-        {
-            vertex: "",
-            fragment: "",
-        },
-        {
-            camera: renderCamera,
-            in: [shadow],
-            out: [color],
-        });
-    let outlinePass = new RenderPass(Scene.getPostProcessPlane(), 
-        {
-            vertex: "",
-            fragment: "",
-        },
-        {
-            in: [color],
-            uniforms: [
-                { name: "thickness", type: "f" }
-            ]
-        });
-
-    renderGraph = new RenderGraph([
-        shadowPass, renderPass, outlinePass
-    ]);
-    */
-
-    const depthTextureSize = 4096;
-    let shadowDepth = new RenderTexture(DEPTH_TARGET,
-        [depthTextureSize, depthTextureSize], { compareMode: true });
+    const depthTextureSize = 2048;
+    const shadowDepth = new RenderTexture(DEPTH_TARGET, {
+        size: [depthTextureSize, depthTextureSize], 
+        compareMode: true,
+        filter: "linear",
+    });
 
     const sun = normalize(sunDir);
     const sceneSize = 40;
@@ -94,6 +58,10 @@ export function loadScientificShading(scene, mainCamera, sunDir) {
         });
 
     const palette = new Texture("./resources/vanilla-milkshake-1x.png");
+    const renderImage = new RenderTexture(COLOR_TARGET);
+    const renderNormal = new RenderTexture(COLOR_TARGET, { wrap: 'clamp' });
+    const renderDepth = new RenderTexture(DEPTH_TARGET, { wrap: 'clamp' });
+
     let renderPass = new RenderPass(scene,
         new Shader(renderVert, renderFrag),
         {
@@ -102,12 +70,28 @@ export function loadScientificShading(scene, mainCamera, sunDir) {
                 { name: 'u_shadow', type: 't', value: shadowDepth },
                 { name: 'u_palette', type: 't', value: palette },
                 { name: 'u_shadowViewProj', type: 'm4', value: shadowCamera.viewProjMatrix },
+            ],
+            out: {
+                colors: [renderImage, renderNormal],
+                depth: renderDepth,
+            },
+        });
+
+    let outlinePass = new RenderPass(Scene.getPostProcessPlane(),
+        new Shader(outlineVert, outlineFrag),
+        {
+            camera: mainCamera,
+            uniforms: [
+                { name: "u_color", type: 't', value: renderImage },
+                { name: "u_normal", type: 't', value: renderNormal },
+                { name: "u_depth", type: 't', value: renderDepth },
             ]
         });
 
     renderGraph = new RenderGraph([
         shadowPass,
         renderPass,
+        outlinePass,
     ]);
 }
 
