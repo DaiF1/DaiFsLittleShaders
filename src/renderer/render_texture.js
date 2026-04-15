@@ -3,16 +3,36 @@ import { gl } from "./gl";
 export const COLOR_TARGET = "color";
 export const DEPTH_TARGET = "depth";
 
+function stringToFilter(str) {
+    switch (str) {
+        case "linear":
+            return gl.LINEAR;
+        case "nearest":
+            return gl.NEAREST;
+    }
+}
+
+function stringToWrap(str) {
+    switch (str) {
+        case "repeat":
+            return gl.REPEAT;
+        case "clamp":
+            return gl.CLAMP_TO_EDGE;
+    }
+}
+
 export class RenderTexture
 {
-    constructor(target, size, params) {
+    constructor(target, params = {}) {
         this.target = target;
 
-        const targetTextureWidth = size != null ? size[0] : gl.canvas.width;
-        const targetTextureHeight = size != null ? size[1] : gl.canvas.height;
-        this.matchCanvasSize = size == null;
+        const targetTextureWidth = params.size != null ? params.size[0] : gl.canvas.width;
+        const targetTextureHeight = params.size != null ? params.size[1] : gl.canvas.height;
+        this.matchCanvasSize = params.size == null;
 
-        this.compareMode = params != null ? params.compareMode : false;
+        this.filter = params.filter ?? 'nearest';
+        this.wrap = params.wrap ?? 'repeat';
+        this.compareMode = params.compareMode ?? false;
         this.createTexture(targetTextureWidth, targetTextureHeight);
     }
 
@@ -41,8 +61,12 @@ export class RenderTexture
                 width, height);
         }
 
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        const filter = stringToFilter(this.filter);
+        const wrap = stringToWrap(this.wrap);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
 
         if (this.compareMode) {
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_MODE, gl.COMPARE_REF_TO_TEXTURE);
