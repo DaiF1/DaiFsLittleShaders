@@ -1,4 +1,6 @@
 import { gl } from "./gl";
+import { Mesh } from "./mesh";
+import { SceneMesh } from "./scene_mesh";
 
 const MAX_LIGHT_COUNT = 10;
 
@@ -48,5 +50,23 @@ export class Scene
     }
 
     static getPostProcessPlane() {
+        const plane = new Mesh([
+            -1.0, -1.0, 0.0,
+             1.0, -1.0, 0.0,
+            -1.0,  1.0, 0.0,
+            -1.0,  1.0, 0.0,
+             1.0, -1.0, 0.0,
+             1.0,  1.0, 0.0,
+        ],
+        [],
+        [
+            0.0, 0.0,
+            1.0, 0.0,
+            0.0, 1.0,
+            0.0, 1.0,
+            1.0, 0.0,
+            1.0, 1.0,
+        ]);
+        return new Scene([new SceneMesh(plane)]);
     }
 };

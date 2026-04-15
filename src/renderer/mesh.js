@@ -86,9 +86,9 @@ function parseOBJ(text) {
 export class Mesh
 {
     constructor(vertices, normals, uvs) {
-        this.vertices = vertices;
-        this.normals = normals;
-        this.uvs = uvs;
+        this.vertices = vertices ?? [];
+        this.normals = normals ?? [];
+        this.uvs = uvs ?? [];
 
         this.programCache = {};
     }
