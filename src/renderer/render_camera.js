@@ -52,6 +52,18 @@ export class RenderCamera
         let positionUniformLoc = gl.getUniformLocation(program, "u_cameraPosition");
         if (positionUniformLoc != null)
             gl.uniformMatrix4fv(positionUniformLoc, false, this.position);
+
+        let nearUniformLoc = gl.getUniformLocation(program, "u_near");
+        if (nearUniformLoc != null)
+            gl.uniform1f(nearUniformLoc, this.near);
+
+        let farUniformLoc = gl.getUniformLocation(program, "u_far");
+        if (farUniformLoc != null)
+            gl.uniform1f(farUniformLoc, this.far);
+
+        let viewportUniformLoc = gl.getUniformLocation(program, "u_viewportSize");
+        if (viewportUniformLoc != null)
+            gl.uniform2fv(viewportUniformLoc, [gl.canvas.width, gl.canvas.height]);
     }
 
     moveCamera(newPosition, newTarget) {

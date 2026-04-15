@@ -17,7 +17,8 @@ export class Scene
 
         const dirLightCount = Math.min(MAX_LIGHT_COUNT, this.directionalLights.length);
         const dirLightCountLoc = gl.getUniformLocation(program, "u_dirLightCount");
-        gl.uniform1i(dirLightCountLoc, dirLightCount);
+        if (dirLightCountLoc != null)
+            gl.uniform1i(dirLightCountLoc, dirLightCount);
 
         for (let i = 0; i < dirLightCount; i++) {
             const dirLoc = gl.getUniformLocation(program, `u_dirLights[${i}].direction`);
@@ -32,7 +33,8 @@ export class Scene
 
         const pointLightCount = Math.min(MAX_LIGHT_COUNT, this.pointLights.length);
         const pointLightCountLoc = gl.getUniformLocation(program, "u_pointLightCount");
-        gl.uniform1i(pointLightCountLoc, pointLightCount);
+        if (pointLightCountLoc != null)
+            gl.uniform1i(pointLightCountLoc, pointLightCount);
 
         for (let i = 0; i < pointLightCount; i++) {
             const posLoc = gl.getUniformLocation(program, `u_pointLights[${i}].position`);
