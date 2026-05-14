@@ -3,20 +3,16 @@ import "./style.css"
 import renderVert from "./shaders/render.vert.js"
 import renderFrag from "./shaders/render.frag.js"
 
-import outlineVert from "./shaders/outline.vert.js"
-import outlineFrag from "./shaders/outline.frag.js"
-
 import shadowVert from "../common/shadow.vert.js"
 import shadowFrag from "../common/shadow.frag.js"
 
 import { RenderGraph } from "../../renderer/render_graph";
 import { RenderPass } from "../../renderer/render_pass";
-import { COLOR_TARGET, DEPTH_TARGET, RenderTexture } from "../../renderer/render_texture";
+import { DEPTH_TARGET, RenderTexture } from "../../renderer/render_texture";
 import { Texture } from "../../renderer/texture.js";
 import { ORTHOGRAPHIC_CAMERA, RenderCamera } from "../../renderer/render_camera.js"
-import { normalize } from "../../utils.js"
+import { normalize } from "../../utils/math.js"
 import { Shader } from "../../renderer/shader.js"
-import { Scene } from "../../renderer/scene.js"
 
 let renderGraph;
 

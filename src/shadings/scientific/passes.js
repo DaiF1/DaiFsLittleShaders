@@ -14,7 +14,7 @@ import { RenderPass } from "../../renderer/render_pass";
 import { COLOR_TARGET, DEPTH_TARGET, RenderTexture } from "../../renderer/render_texture";
 import { Texture } from "../../renderer/texture.js";
 import { ORTHOGRAPHIC_CAMERA, RenderCamera } from "../../renderer/render_camera.js"
-import { normalize } from "../../utils.js"
+import { normalize } from "../../utils/math.js"
 import { Shader } from "../../renderer/shader.js"
 import { Scene } from "../../renderer/scene.js"
 

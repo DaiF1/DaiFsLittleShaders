@@ -1,5 +1,5 @@
 import { gl } from "./gl";
-import { degToRad, vecLerp } from "../utils";
+import { degToRad, vecLerp } from "../utils/math";
 import { m4 } from "./m4";
 
 export const PERSPECTIVE_CAMERA = "perspective"

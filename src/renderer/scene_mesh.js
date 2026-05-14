@@ -1,5 +1,5 @@
 import { gl } from "./gl";
-import { degToRad } from "../utils";
+import { degToRad } from "../utils/math";
 import { m4 } from "./m4";
 
 export class SceneMesh

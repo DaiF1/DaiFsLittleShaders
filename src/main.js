@@ -6,7 +6,7 @@ import { PERSPECTIVE_CAMERA, RenderCamera } from "./renderer/render_camera";
 import { Scene } from "./renderer/scene";
 import { SceneMesh } from "./renderer/scene_mesh";
 import { initUI } from "./ui";
-import { degToRad } from "./utils";
+import { degToRad } from "./utils/math";
 
 // Shadings
 import { loadPBRShading, renderPBRShading } from "./shadings/pbr/passes";
