@@ -64,11 +64,18 @@ async function loadDDS(file) {
 
 export class Texture
 {
+    static cache = {};
+
     constructor(file) {
         this._loadTexture(file);
     }
 
     async _loadTexture(file) {
+        if (file in Texture.cache) {
+            this.texture = Texture.cache[file].texture;
+            this.isCubemap = Texture.cache[file].isCubemap;
+        }
+
         const filetype = file.split('.').pop();
         this.file = file;
         switch (filetype) {
@@ -84,7 +91,10 @@ export class Texture
             } break;
             default:
                 console.error(`Unknown image type: '${filetype}'.`);
+                return;
         }
+
+        Texture.cache[file] = { texture: this.texture, isCubemap: this.isCubemap };
     }
 
     bind(index) {
