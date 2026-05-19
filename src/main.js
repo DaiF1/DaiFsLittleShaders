@@ -53,6 +53,7 @@ async function main() {
         shadingCallback: (newShading) => {
             currentShading = newShading;
             shadingFunctions[currentShading].load(scene, mainCamera, sunDir);
+            document.body.classList = newShading;
         },
     });
 
