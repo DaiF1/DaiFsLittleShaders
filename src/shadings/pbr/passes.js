@@ -57,6 +57,10 @@ export function loadPBRShading(scene, mainCamera, sunDir) {
     const roughness = new Texture("./resources/roughness.png");
     const metallic = new Texture("./resources/metallic.png");
 
+    const diffuse = new Texture("./resources/ibl/grasslands_sunset/ibl_irradiance_cube.dds");
+    const specular = new Texture("./resources/ibl/grasslands_sunset/ibl_specular_cube.dds");
+    const brdf_lookup = new Texture("./resources/ibl/grasslands_sunset/brdf_look_up_table.dds");
+
     let renderPass = new RenderPass(scene,
         new Shader(renderVert, renderFrag),
         {
@@ -66,6 +70,9 @@ export function loadPBRShading(scene, mainCamera, sunDir) {
                 { name: 'u_palette', type: 't', value: palette },
                 { name: 'u_roughness', type: 't', value: roughness },
                 { name: 'u_metallic', type: 't', value: metallic },
+                { name: 'u_diffuse', type: 't', value: diffuse },
+                { name: 'u_specular', type: 't', value: specular },
+                { name: 'u_brdf', type: 't', value: brdf_lookup },
                 { name: 'u_shadowViewProj', type: 'm4', value: shadowCamera.viewProjMatrix },
             ],
         });

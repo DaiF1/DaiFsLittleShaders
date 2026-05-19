@@ -51,7 +51,7 @@ export class RenderCamera
 
         let positionUniformLoc = gl.getUniformLocation(program, "u_cameraPosition");
         if (positionUniformLoc != null)
-            gl.uniformMatrix4fv(positionUniformLoc, false, this.position);
+            gl.uniform3fv(positionUniformLoc, this.position);
 
         let nearUniformLoc = gl.getUniformLocation(program, "u_near");
         if (nearUniformLoc != null)
