@@ -99,6 +99,6 @@ export function loadScientificShading(scene, mainCamera, sunDir) {
     ]);
 }
 
-export function renderScientificShading() {
-    renderGraph.render();
+export function renderScientificShading(elapsedTime) {
+    renderGraph.render(elapsedTime);
 }

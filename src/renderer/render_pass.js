@@ -50,7 +50,7 @@ export class RenderPass
         this.cullface = params.cullface ?? "back";
     }
 
-    run(screenResized) {
+    run(screenResized, elapsedTime) {
         if (this.cullface !== "none") {
             gl.enable(gl.CULL_FACE);
             gl.cullFace(stringToCullFace(this.cullface));
@@ -79,6 +79,9 @@ export class RenderPass
             const loc = gl.getUniformLocation(this.shader.program, u.name);
             bindUniform(loc, u.type, value);
         }
+
+        const loc = gl.getUniformLocation(this.shader.program, "u_time");
+        bindUniform(loc, "f", elapsedTime);
 
         this.scene.render(this.shader);
     }

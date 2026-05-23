@@ -86,6 +86,6 @@ export function loadPBRShading(scene, mainCamera, sunDir) {
     ]);
 }
 
-export function renderPBRShading() {
-    renderGraph.render();
+export function renderPBRShading(elapsedTime) {
+    renderGraph.render(elapsedTime);
 }

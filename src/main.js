@@ -75,16 +75,18 @@ async function main() {
     shadingFunctions[currentShading].load(scene, mainCamera, sunDir);
 
     let startTime = 0.0
+    let elapsedTime = 0.0;
     function renderLoop(currentTime) {
         currentTime *= 0.001;
         let dt = currentTime - startTime;
+        elapsedTime += dt;
 
         planet.rotateZ(-10 * dt);
         mainCamera.update(dt);
 
         startTime = currentTime;
 
-        shadingFunctions[currentShading].render();
+        shadingFunctions[currentShading].render(elapsedTime);
         requestAnimationFrame(renderLoop);
     }
     requestAnimationFrame(renderLoop);

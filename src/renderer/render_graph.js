@@ -24,7 +24,7 @@ export class RenderGraph
         this.lastSize = { width: gl.canvas.width, height: gl.canvas.height };
     }
 
-    render() {
+    render(elapsedTime) {
         let resized = resizeCanvasToDisplaySize(gl.canvas);
         if (resized)
             this.lastSize = { width: gl.canvas.width, height: gl.canvas.height };
@@ -85,7 +85,7 @@ export class RenderGraph
             gl.clearColor(0, 0, 0, 0);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-            pass.run(resized);
+            pass.run(resized, elapsedTime);
         }
     }
 };
