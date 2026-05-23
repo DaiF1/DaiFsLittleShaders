@@ -40,6 +40,7 @@ async function main() {
         "scientific": { load: loadScientificShading, render: renderScientificShading },
     }
     let currentShading = "pbr";
+    document.body.classList = currentShading;
 
     let useFarCam = false;
     initUI({

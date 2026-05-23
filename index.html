@@ -5,15 +5,25 @@
         <link rel="icon" type="image/png" href="/dino.png" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>DaiF's Little Shaders</title>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
     </head>
     <body>
       <canvas id="c" width=600 height=400></canvas>
       <nav>
         <button id="camera-button">Switch Camera</button>
-        <select id="shading-select">
-          <option value="pbr">Physically Based Rendering</option>
-          <option value="scientific">Scientific (Gooch)</option>
-        </select>
+        <div class="custom-select">
+          <button class="select-button">
+            <span class="selected-value">Physically Based Rendering</span>
+            <span class="arrow"></span>
+          </button>
+          <ul class="select-dropdown hidden">
+            <li tabindex="0" data-value="pbr">Physically Based Rendering</li>
+            <li tabindex="0" data-value="scientific">Scientific (Gooch)</li>
+          </ul>
+        </div>
       </nav>
       <script type="module" src="./src/main.js"></script>
     </body>
