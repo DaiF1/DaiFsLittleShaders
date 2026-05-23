@@ -30,7 +30,7 @@ export class RenderCamera
             );
         }
 
-        this.position = params.position ?? [35, 0, 0];
+        this.position = params.position ?? [10, 0, 0];
         this.target = params.target ?? [0, 0, 0];
         this.up = params.up ?? [0, 1, 0];
 

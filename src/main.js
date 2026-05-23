@@ -32,8 +32,6 @@ async function main() {
         ],
     });
 
-    const mainCamera = new RenderCamera(PERSPECTIVE_CAMERA);
-
     // Shaders setup
     const shadingFunctions = {
         "pbr": { load: loadPBRShading, render: renderPBRShading },
@@ -42,12 +40,28 @@ async function main() {
     let currentShading = "pbr";
     document.body.classList = currentShading;
 
-    let useFarCam = false;
+    let camIndex = 0;
+    const camPos = [
+        [30, 0, 0],
+        [25, 0, 15],
+        [45, 30, 55],
+        [10, 0, 0],
+    ];
+    const camTarget = [
+        [0, 0, 0],
+        [0, 1, 0],
+        [-5, 0, 0],
+        [0, 2, 0],
+    ];
+    const mainCamera = new RenderCamera(PERSPECTIVE_CAMERA, {
+        position: camPos[camIndex],
+    });
+
     initUI({
         cameraCallback: () => {
-            useFarCam = !useFarCam;
-            const pos = useFarCam ? [45, 30, 55] : [35, 0, 0];
-            const target = useFarCam ? [-5, 0, 0] : [0, 0, 0];
+            camIndex = (camIndex + 1) % camPos.length;
+            const pos = camPos[camIndex];
+            const target = camTarget[camIndex];
             mainCamera.moveCamera(pos, target);
         },
         shadingCallback: (newShading) => {
