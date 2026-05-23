@@ -1,4 +1,6 @@
 import lighting from "../../common/lighting.js"
+import agx from "../../common/agx.glsl.js"
+import gamma from "../../common/gamma.glsl.js"
 
 export default `#version 300 es
  
@@ -17,6 +19,11 @@ out vec4 outColor;
 
 // Lights
 ${lighting}
+
+// Tonemapping
+${agx}
+
+${gamma}
 
 // uniforms
 uniform sampler2DShadow u_shadow;
@@ -123,6 +130,6 @@ void main() {
         color += directLighting(albedo, v_normal, normalize(light.position - v_position), viewDirection, light.color, light.intensity, metallic, roughness) * att;
     }
 
-    outColor = vec4(color, 1.0);
+    outColor = vec4(gammaCorrect(agxPunchy(color)), 1.0);
 }
 `;

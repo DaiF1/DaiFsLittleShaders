@@ -1,3 +1,5 @@
+import gamma from "../../common/gamma.glsl.js"
+
 export default `#version 300 es
 
 precision highp float;
@@ -13,6 +15,8 @@ uniform sampler2D u_depth;
 uniform vec2 u_viewportSize;
 uniform float u_near;
 uniform float u_far;
+
+${gamma}
 
 vec4 getPixel(sampler2D tex, ivec2 offset) {
     ivec2 uv = ivec2(gl_FragCoord.xy) + offset;
@@ -68,6 +72,7 @@ void main() {
     float outline = smoothstep(0.01, 0.2, normalDiff) + smoothstep(0.1, 0.9, depthDiff);
     vec4 color = texture(u_color, v_uv);
     vec4 outlineColor = vec4(62.0 / 255.0, 34.0 / 255.0, 161.0 / 255.0, 1.0);
+    vec4 finalColor = mix(color, outlineColor, outline);
 
-    outColor = mix(color, outlineColor, outline);
+    outColor = gammaCorrect(finalColor);
 }`;

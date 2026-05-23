@@ -5,7 +5,6 @@ import renderFrag from "./shaders/render.frag.js"
 
 import planeVert from "../common/plane.vert.js"
 import outlineFrag from "./shaders/outline.frag.js"
-import toneFrag from "../common/tonemap.frag.js"
 
 import shadowVert from "../common/shadow.vert.js"
 import shadowFrag from "../common/shadow.frag.js"
@@ -81,7 +80,6 @@ export function loadScientificShading(scene, mainCamera, sunDir) {
             },
         });
 
-    const render = new RenderTexture(COLOR_TARGET, { filter: "linear" });
     let outlinePass = new RenderPass(Scene.getPostProcessPlane(),
         new Shader(planeVert, outlineFrag),
         {
@@ -91,29 +89,13 @@ export function loadScientificShading(scene, mainCamera, sunDir) {
                 { name: "u_normal", type: 't', value: renderNormal },
                 { name: "u_depth", type: 't', value: renderDepth },
             ],
-            out: {
-                colors: [render],
-            }
         });
-
-
-    let tonemapPass = new RenderPass(Scene.getPostProcessPlane(),
-        new Shader(planeVert, toneFrag),
-        {
-            camera: mainCamera,
-            uniforms: [
-                { name: 'u_hdr', type: 't', value: render },
-                { name: 'u_exposure', type: 'f', value: 1.2 },
-            ]
-        }
-    );
 
 
     renderGraph = new RenderGraph([
         shadowPass,
         renderPass,
         outlinePass,
-        tonemapPass,
     ]);
 }
 
