@@ -33,21 +33,6 @@ uniform mat4 u_shadowViewProj;
 // Constants
 vec3 envmapRot = vec3(-1.0, 1.0, -1.0);
 
-float ACESFilm(float x)
-{
-  float a = 2.51f;
-  float b = 0.03f;
-  float c = 2.43f;
-  float d = 0.59f;
-  float e = 0.14f;
-  return clamp((x*(a*x+b))/(x*(c*x+d)+e), 0.0, 1.0);
-}
-
-vec3 ACESFilm(vec3 c)
-{
-  return vec3(ACESFilm(c.r), ACESFilm(c.g), ACESFilm(c.b));
-}
-
 vec3 fresnel_shlick(float f0, vec3 w_i, vec3 w_o)
 {
   vec3 h = normalize(w_i + w_o);
@@ -138,6 +123,6 @@ void main() {
         color += directLighting(albedo, v_normal, normalize(light.position - v_position), viewDirection, light.color, light.intensity, metallic, roughness);
     }
 
-    outColor = vec4(ACESFilm(color), 1.0);
+    outColor = vec4(color, 1.0);
 }
 `;

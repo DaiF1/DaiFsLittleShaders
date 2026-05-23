@@ -6,13 +6,17 @@ import renderFrag from "./shaders/render.frag.js"
 import shadowVert from "../common/shadow.vert.js"
 import shadowFrag from "../common/shadow.frag.js"
 
+import toneVert from "../common/plane.vert.js"
+import toneFrag from "../common/tonemap.frag.js"
+
 import { RenderGraph } from "../../renderer/render_graph";
 import { RenderPass } from "../../renderer/render_pass";
-import { DEPTH_TARGET, RenderTexture } from "../../renderer/render_texture";
+import { COLOR_TARGET, DEPTH_TARGET, RenderTexture } from "../../renderer/render_texture";
 import { Texture } from "../../renderer/texture.js";
 import { ORTHOGRAPHIC_CAMERA, RenderCamera } from "../../renderer/render_camera.js"
 import { normalize } from "../../utils/math.js"
 import { Shader } from "../../renderer/shader.js"
+import { Scene } from "../../renderer/scene.js"
 
 let renderGraph;
 
@@ -61,6 +65,8 @@ export function loadPBRShading(scene, mainCamera, sunDir) {
     const specular = new Texture("./resources/ibl/grasslands_sunset/ibl_specular_cube.dds");
     const brdf_lookup = new Texture("./resources/ibl/grasslands_sunset/brdf_look_up_table.dds");
 
+    const render = new RenderTexture(COLOR_TARGET, { filter: "linear" });
+
     let renderPass = new RenderPass(scene,
         new Shader(renderVert, renderFrag),
         {
@@ -75,11 +81,26 @@ export function loadPBRShading(scene, mainCamera, sunDir) {
                 { name: 'u_brdf', type: 't', value: brdf_lookup },
                 { name: 'u_shadowViewProj', type: 'm4', value: shadowCamera.viewProjMatrix },
             ],
+            out: {
+                colors: [render],
+            }
         });
+
+    let tonemapPass = new RenderPass(Scene.getPostProcessPlane(),
+        new Shader(toneVert, toneFrag),
+        {
+            camera: mainCamera,
+            uniforms: [
+                { name: 'u_hdr', type: 't', value: render },
+                { name: 'u_exposure', type: 'f', value: 1.0 },
+            ]
+        }
+    );
 
     renderGraph = new RenderGraph([
         shadowPass,
         renderPass,
+        tonemapPass,
     ]);
 }
 

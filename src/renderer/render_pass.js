@@ -8,6 +8,11 @@ function bindUniform(location, type, value) {
         case 't':
             gl.uniform1i(location, value);
             break;
+        case 'f':
+            gl.uniform1f(location, value);
+            break;
+        default:
+            console.error(`Type not supported: ${type}`);
     }
 }
 
