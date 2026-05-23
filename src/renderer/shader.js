@@ -20,8 +20,13 @@ function createProgram(vertexShader, fragmentShader) {
     gl.attachShader(program, fragmentShader);
     gl.linkProgram(program);
     let success = gl.getProgramParameter(program, gl.LINK_STATUS);
-    if (success)
+    if (success) {
+        gl.detachShader(program, vertexShader);
+        gl.detachShader(program, fragmentShader);
+        gl.deleteShader(vertexShader);
+        gl.deleteShader(fragmentShader);
         return program;
+    }
 
     console.log(gl.getProgramInfoLog(program));
     gl.deleteProgram(program);

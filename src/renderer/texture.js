@@ -74,6 +74,7 @@ export class Texture
         if (file in Texture.cache) {
             this.texture = Texture.cache[file].texture;
             this.isCubemap = Texture.cache[file].isCubemap;
+            return;
         }
 
         const filetype = file.split('.').pop();

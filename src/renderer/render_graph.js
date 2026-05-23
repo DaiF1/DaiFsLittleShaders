@@ -31,8 +31,11 @@ export class RenderGraph
 
             if (pass.out != null) {
                 if (resized || this.cache[pass.id] == undefined) {
-                    if (this.cache[pass.id])
+                    if (this.cache[pass.id]) {
                         gl.deleteFramebuffer(this.cache[pass.id].fb);
+                        if (this.cache[pass.id].renderbuffer)
+                            gl.deleteTexture(this.cache[pass.id].renderbuffer.texture);
+                    }
 
                     const fb = gl.createFramebuffer();
                     gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
@@ -61,7 +64,7 @@ export class RenderGraph
                     const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
                     if (status !== gl.FRAMEBUFFER_COMPLETE)
                         console.error(`Invalid Framebuffer (status: ${framebufferErrorToString(status)}).`);
-                    this.cache[pass.id] = { fb, attachments };
+                    this.cache[pass.id] = { fb, attachments, renderbuffer: pass.out.depth == null ? depth : null };
                 }
 
                 gl.bindFramebuffer(gl.FRAMEBUFFER, this.cache[pass.id].fb);
