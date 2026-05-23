@@ -29,7 +29,11 @@ function stringToCullFace(s) {
 
 export class RenderPass
 {
+    static lastId = 0;
+
     constructor(scene, shader, params) {
+        this.id = RenderPass.lastId++;
+
         this.scene = scene;
         this.camera = params.camera ?? null;
 

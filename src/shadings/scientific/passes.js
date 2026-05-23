@@ -19,9 +19,12 @@ import { normalize } from "../../utils/math.js"
 import { Shader } from "../../renderer/shader.js"
 import { Scene } from "../../renderer/scene.js"
 
-let renderGraph;
+let renderGraph = null;
 
 export function loadScientificShading(scene, mainCamera, sunDir) {
+    if (renderGraph != null)
+        return;
+
     const depthTextureSize = 2048;
     const shadowDepth = new RenderTexture(DEPTH_TARGET, {
         size: [depthTextureSize, depthTextureSize], 

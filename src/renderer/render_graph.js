@@ -19,6 +19,7 @@ export class RenderGraph
 {
     constructor(passes) {
         this.passes = passes;
+        this.cache = {};
     }
 
     render() {
@@ -29,36 +30,42 @@ export class RenderGraph
             const height = pass.renderHeight ?? gl.canvas.height;
 
             if (pass.out != null) {
-                // Create and link Framebuffer
-                this.currentFB = gl.createFramebuffer();
-                gl.bindFramebuffer(gl.FRAMEBUFFER, this.currentFB);
+                if (resized || this.cache[pass.id] == undefined) {
+                    if (this.cache[pass.id])
+                        gl.deleteFramebuffer(this.cache[pass.id].fb);
 
-                const colors = pass.out.colors ?? [];
-                const attachments = []
-                for (let i = 0; i < colors.length; i++) {
-                    const tex = colors[i];
-                    if (resized)
-                        tex.resize(width, height);
+                    const fb = gl.createFramebuffer();
+                    gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
 
-                    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + i,
-                        gl.TEXTURE_2D, tex.texture, 0);
-                    attachments.push(gl.COLOR_ATTACHMENT0 + i);
+                    const colors = pass.out.colors ?? [];
+                    const attachments = []
+                    for (let i = 0; i < colors.length; i++) {
+                        const tex = colors[i];
+                        if (resized)
+                            tex.resize(width, height);
+
+                        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + i,
+                            gl.TEXTURE_2D, tex.texture, 0);
+                        attachments.push(gl.COLOR_ATTACHMENT0 + i);
+                    }
+
+                    let depth = pass.out.depth;
+                    if (depth == null) {
+                        depth = new RenderTexture(DEPTH_TARGET, { renderSize: [width, height] }); // TODO: replace with renderbuffer
+                    } else if (resized) {
+                        depth.resize(width, height);
+                    }
+                    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT,
+                        gl.TEXTURE_2D, depth.texture, 0);
+
+                    const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+                    if (status !== gl.FRAMEBUFFER_COMPLETE)
+                        console.error(`Invalid Framebuffer (status: ${framebufferErrorToString(status)}).`);
+                    this.cache[pass.id] = { fb, attachments };
                 }
 
-                let depth = pass.out.depth;
-                if (depth == null) {
-                    depth = new RenderTexture(DEPTH_TARGET, { renderSize: [width, height] }); // TODO: replace with renderbuffer
-                } else if (resized) {
-                    depth.resize(width, height);
-                }
-                gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT,
-                    gl.TEXTURE_2D, depth.texture, 0);
-
-                const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
-                if (status !== gl.FRAMEBUFFER_COMPLETE)
-                    console.error(`Invalid Framebuffer (status: ${framebufferErrorToString(status)}).`);
-
-                gl.drawBuffers(attachments);
+                gl.bindFramebuffer(gl.FRAMEBUFFER, this.cache[pass.id].fb);
+                gl.drawBuffers(this.cache[pass.id].attachments);
             }
             else {
                 gl.bindFramebuffer(gl.FRAMEBUFFER, null);
