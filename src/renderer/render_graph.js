@@ -20,14 +20,20 @@ export class RenderGraph
     constructor(passes) {
         this.passes = passes;
         this.cache = {};
+
+        this.lastSize = { width: gl.canvas.width, height: gl.canvas.height };
     }
 
     render() {
-        const resized = resizeCanvasToDisplaySize(gl.canvas);
+        let resized = resizeCanvasToDisplaySize(gl.canvas);
+        if (resized)
+            this.lastSize = { width: gl.canvas.width, height: gl.canvas.height };
 
         for (let pass of this.passes) {
             const width = pass.renderWidth ?? gl.canvas.width;
             const height = pass.renderHeight ?? gl.canvas.height;
+            if (width !== this.lastSize.width || height !== this.lastSize.height)
+                resized = true;
 
             if (pass.out != null) {
                 if (resized || this.cache[pass.id] == undefined) {
