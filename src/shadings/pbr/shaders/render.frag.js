@@ -120,7 +120,7 @@ void main() {
         if (att <= 0.0f)
             continue;
 
-        color += directLighting(albedo, v_normal, normalize(light.position - v_position), viewDirection, light.color, light.intensity, metallic, roughness);
+        color += directLighting(albedo, v_normal, normalize(light.position - v_position), viewDirection, light.color, light.intensity, metallic, roughness) * att;
     }
 
     outColor = vec4(color, 1.0);

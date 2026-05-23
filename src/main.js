@@ -24,12 +24,11 @@ async function main() {
         directional: [
             { direction: sunDir, color: [1, 0.8, 0.6], intensity: 1 },
         ],
-        point: [/*
-            { position: [9.6, -3, 0.78], color: [1, 0, 0], intensity: 0.2 },
-            { position: [9.6, -3, -0.78], color: [1, 0, 0], intensity: 0.2 },
+        point: [
+            { position: [9.6, -3, 0.78], color: [1, 0, 0], intensity: 0.3 },
+            { position: [9.6, -3, -0.78], color: [1, 0, 0], intensity: 0.3 },
             { position: [5.3, -0.5, 0.7], color: [1, 1, 0], intensity: 0.7 },
             { position: [5.3, -0.5, -0.7], color: [1, 1, 0], intensity: 0.7 },
-            */
         ],
     });
 

@@ -46,8 +46,8 @@ float sqr(float a) {
     return a * a;
 }
 
-float attenuation(float distance, float radius) {
-    float x = min(distance, radius);
-    return sqr(1.0 - sqr(sqr(x / radius))) / (sqr(x) + 1.0);
+float attenuation(float dist, float radius) {
+    float att = clamp(1.0 - dist*dist/(radius*radius), 0.0, 1.0);
+    return att * att;
 }
 `;
