@@ -1,0 +1,77 @@
+body.handdrawn {
+    & {
+        background-color: white;
+    }
+
+    nav {
+        background-color: white;
+        border-radius: 5px;
+        font-family: "Patrick Hand", cursive;
+        font-weight: bold;
+        font-size: 1em;
+        animation: 0.3s steps(1, start) 0s infinite jitter-box;
+    }
+
+    nav button {
+        border: 2px solid black;
+        padding: 0.3em 0.8em;
+        background-color: white;
+        color: black;
+
+        background-color: white;
+        font-family: "Patrick Hand", cursive;
+        font-weight: bold;
+        font-size: 1em;
+
+        animation: 0.3s steps(1, start) 0s infinite jitter-box;
+    }
+
+    nav button:hover, .select-dropdown li:hover,
+    nav button:focus, .select-dropdown li:focus {
+        background-color: rgb(220, 220, 220);
+    }
+
+    nav button:active, .select-dropdown li:active {
+        background-color: #a397fc;
+    }
+
+    nav button:focus-visible, .select-dropdown li:focus-visible {
+        outline: none;
+        animation: 0.3s steps(1, start) 0s infinite jitter-box;
+    }
+
+    .select-button .arrow {
+        border-top-color: black;
+    }
+
+    .select-dropdown {
+        background-color: white;
+        color: black;
+        animation: 0.3s steps(1, start) 0s infinite jitter-box;
+    }
+
+    .select-dropdown li {
+        margin: 2px;
+        font-size: 1em;
+    }
+}
+
+@keyframes jitter-box {
+    from {
+        border: 2px solid rgb(31, 31, 31);
+        border-radius: 255px 15px 225px 15px/20px 255px 20px 255px;
+        margin: 1px;
+    }
+
+    50% {
+        border: 3px solid rgb(31, 31, 31);
+        border-radius: 20px 255px 20px 255px/255px 15px 225px 15px;
+        margin: 0;
+    }
+
+    to {
+        border: 2px solid rgb(31, 31, 31);
+        border-radius: 255px 15px 225px 15px/20px 255px 20px 255px;
+        margin: 1px;
+    }
+}

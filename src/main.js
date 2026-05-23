@@ -11,6 +11,7 @@ import { degToRad } from "./utils/math";
 // Shadings
 import { loadPBRShading, renderPBRShading } from "./shadings/pbr/passes";
 import { loadScientificShading, renderScientificShading } from "./shadings/scientific/passes";
+import { loadHanddrawnShading, renderHanddrawnShading } from "./shadings/handdrawn/passes";
 
 async function main() {
     initWebGL();
@@ -36,6 +37,7 @@ async function main() {
     const shadingFunctions = {
         "pbr": { load: loadPBRShading, render: renderPBRShading },
         "scientific": { load: loadScientificShading, render: renderScientificShading },
+        "handdrawn": { load: loadHanddrawnShading, render: renderHanddrawnShading },
     }
     let currentShading = "pbr";
     document.body.classList = currentShading;
