@@ -40,6 +40,7 @@ void main() {
     {
         DirectionalLight light = u_dirLights[i];
         intensity += max(dot(normalize(light.direction), v_normal) * light.intensity, 0.0);
+        diffuse += light.color * intensity;
     }
 
     for (int i = 0; i < u_pointLightCount; i++)
