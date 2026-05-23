@@ -32,7 +32,7 @@ body.handdrawn {
     }
 
     nav button:active, .select-dropdown li:active {
-        background-color: #a397fc;
+        background-color: rgb(200, 200, 200);
     }
 
     nav button:focus-visible, .select-dropdown li:focus-visible {
