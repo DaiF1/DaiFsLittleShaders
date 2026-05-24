@@ -1,0 +1,60 @@
+body.scientific {
+    & {
+        background-color: #e3e6ee;
+    }
+
+    nav {
+        background-color: white;
+        border-radius: 5px;
+        font-family: "Source Sans 3", sans-serif;
+        font-size: 1em;
+    }
+
+    nav button {
+        border: none;
+        padding: 0.5em 0.8em;
+        background-color: white;
+        margin: 2px;
+        color: rgb(28, 28, 31);
+        background-color: #f3f2f7;
+        border-radius: 5px;
+        font-family: "Source Sans 3", sans-serif;
+        font-size: 1em;
+    }
+
+    nav button:hover, .select-dropdown li:hover {
+        background-color: #a397fc;
+        color: #3e22a1;
+    }
+
+    nav button:focus, .select-dropdown li:focus {
+        color: #3e22a1;
+    }
+
+    nav button:active, .select-dropdown li:active {
+        background-color: #a397fc;
+    }
+
+    nav button:focus-visible, .select-dropdown li:focus-visible {
+        border: 2px solid #a397fc;
+        outline: none;
+        margin: 0;
+    }
+
+    .select-button .arrow {
+        border-top-color: rgb(28, 28, 31);
+    }
+
+    .select-dropdown {
+        background-color: #f3f2f7;
+        margin-left: 2px;
+        color: rgb(28, 28, 31);
+        border-radius: 5px;
+    }
+
+    .select-dropdown li {
+        margin: 2px;
+        border-radius: 5px;
+        font-size: 1em;
+    }
+}

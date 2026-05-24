@@ -1,0 +1,48 @@
+body.pbr {
+    & {
+        background-color: #fff9fe;
+        font-family: "Adwaita Sans";
+    }
+
+    nav {
+        background-color: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    nav button {
+        border: none;
+        padding: 0.5em 0.8em;
+        background-color: rgba(0, 0, 0, 0.4);
+        margin: 2px;
+    }
+
+    nav button:hover,
+    nav button:focus {
+        background-color: rgba(0, 0, 0, 0.6);
+    }
+
+    nav button:active, .select-dropdown li:active {
+        background-color: rgba(60, 60, 60, 1.0);
+    }
+
+    nav button:focus-visible, .select-dropdown li:focus-visible {
+        border: 2px solid rgba(0, 0, 0, 0.6);
+        outline: none;
+        margin: 0;
+    }
+
+    .select-dropdown {
+        background-color: rgba(0, 0, 0, 0.5);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        margin-left: 2px;
+    }
+
+    .select-dropdown li {
+        margin: 2px;
+    }
+
+    .select-dropdown li:hover,
+    .select-dropdown li:focus {
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+}
